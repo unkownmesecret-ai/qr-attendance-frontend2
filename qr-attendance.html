@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>QR Attendance</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --accent:#22c55e;
+      --accent2:#ef4444;
+      --text:#f8fafc;
+      --muted:#94a3b8;
+      --border:#1e293b;
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, Helvetica, sans-serif;
+    }
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    nav{
+      display:flex;
+      gap:10px;
+      padding:20px;
+      border-bottom:1px solid var(--border);
+      background:#0b1220;
+    }
+
+    nav button{
+      padding:10px 18px;
+      border:none;
+      border-radius:10px;
+      background:#1e293b;
+      color:white;
+      cursor:pointer;
+    }
+
+    nav button.active{
+      background:var(--accent);
+      color:black;
+      font-weight:bold;
+    }
+
+    .page{
+      display:none;
+      padding:30px;
+    }
+
+    .page.active{
+      display:block;
+    }
+
+    .card{
+      max-width:500px;
+      margin:auto;
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:30px;
+      text-align:center;
+    }
+
+    h1{
+      margin-bottom:20px;
+    }
+
+    #qrcode{
+      margin:20px auto;
+      width:220px;
+      height:220px;
+      background:white;
+      padding:10px;
+      border-radius:12px;
+    }
+
+    .timer{
+      margin-top:20px;
+      font-size:24px;
+      font-weight:bold;
+    }
+
+    .token{
+      margin-top:15px;
+      color:var(--muted);
+      word-break:break-all;
+      font-size:12px;
+    }
+
+    input{
+      width:100%;
+      padding:14px;
+      border-radius:12px;
+      border:none;
+      margin-top:20px;
+      background:#1e293b;
+      color:white;
+      font-size:16px;
+    }
+
+    button.submit{
+      margin-top:20px;
+      width:100%;
+      padding:14px;
+      border:none;
+      border-radius:12px;
+      background:var(--accent);
+      color:black;
+      font-size:16px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .success{
+      color:var(--accent);
+      font-size:20px;
+      margin-top:20px;
+    }
+
+    .error{
+      color:var(--accent2);
+      margin-top:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th, td{
+      border-bottom:1px solid var(--border);
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      color:var(--muted);
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      margin-bottom:20px;
+    }
+
+    .controls button{
+      padding:10px 16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:bold;
+    }
+
+    .export{
+      background:var(--accent);
+    }
+
+    .clear{
+      background:var(--accent2);
+      color:white;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <button class="active" onclick="showPage('admin')">Admin</button>
+  <button onclick="showPage('scan')">Scan</button>
+</nav>
+
+<!-- ADMIN PAGE -->
+
+<div class="page active" id="page-admin">
+
+  <div class="card">
+
+    <h1>QR Attendance</h1>
+
+    <div id="qrcode"></div>
+
+    <div class="timer">
+      Refreshes in:
+      <span id="timerNum">10</span>s
+    </div>
+
+    <div class="token">
+      Token:
+      <span id="tokenSpan"></span>
+    </div>
+
+  </div>
+
+  <div style="max-width:1000px;margin:auto;margin-top:40px;">
+
+    <div class="controls">
+
+      <button class="export" onclick="exportCSV()">
+        Export CSV
+      </button>
+
+      <button class="clear" onclick="clearLog()">
+        Clear
+      </button>
+
+    </div>
+
+    <div id="logContainer"></div>
+
+  </div>
+
+</div>
+
+<!-- SCAN PAGE -->
+
+<div class="page" id="page-scan">
+
+  <div class="card">
+
+    <h1>Student Check-In</h1>
+
+    <div id="formState">
+
+      <input
+        id="idInput"
+        type="text"
+        placeholder="Enter Student ID"
+      />
+
+      <button
+        class="submit"
+        onclick="submitID()"
+      >
+        Check In
+      </button>
+
+      <div class="error" id="errorMsg"></div>
+
+    </div>
+
+    <div class="success" id="successState" style="display:none;">
+      Attendance Recorded
+      <br><br>
+      ID:
+      <span id="successID"></span>
+    </div>
+
+    <div
+      class="error"
+      id="expiredState"
+      style="display:none;"
+    >
+      QR Expired. Scan Again.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const API = 'https://qr-attendance-backend-production-7f84.up.railway.app/';
+
+const TICK = 10;
+
+let timeLeft = TICK;
+
+// ============================================
+// DEVICE ID
+// ============================================
+
+const DB = {
+
+  getDeviceId() {
+
+    let id = localStorage.getItem('qr_device_id');
+
+    if (!id) {
+
+      id =
+        'dev_' +
+        Math.random().toString(36).slice(2,10);
+
+      localStorage.setItem('qr_device_id', id);
+
+    }
+
+    return id;
+  }
+
+};
+
+// ============================================
+// QR
+// ============================================
+
+function buildQR(url){
+
+  const qrcode =
+    document.getElementById('qrcode');
+
+  qrcode.innerHTML = '';
+
+  new QRCode(qrcode, {
+    text:url,
+    width:220,
+    height:220
+  });
+
+}
+
+// ============================================
+// FETCH TOKEN
+// ============================================
+
+async function fetchToken(){
+
+  try{
+
+    const res =
+      await fetch(`${API}/api/token`);
+
+    const data = await res.json();
+
+    buildQR(data.url);
+
+    document.getElementById('tokenSpan')
+      .textContent = data.token;
+
+    timeLeft = TICK;
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+// ============================================
+// TIMER
+// ============================================
+
+function updateTimer(){
+
+  timeLeft--;
+
+  document.getElementById('timerNum')
+    .textContent = timeLeft;
+
+  if(timeLeft <= 0){
+
+    fetchToken();
+
+  }
+
+}
+
+// ============================================
+// RENDER LOG
+// ============================================
+
+async function renderLog(){
+
+  try{
+
+    const res =
+      await fetch(`${API}/api/log`);
+
+    const log = await res.json();
+
+    const container =
+      document.getElementById('logContainer');
+
+    if(!log.length){
+
+      container.innerHTML =
+        '<p>No attendance yet.</p>';
+
+      return;
+
+    }
+
+    container.innerHTML = `
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>Device</th>
+            <th>Time</th>
+            <th>Type</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          ${log.map((e,i)=>`
+
+            <tr>
+
+              <td>${i+1}</td>
+
+              <td>${e.userId}</td>
+
+              <td>${e.deviceId}</td>
+
+              <td>
+                ${new Date(e.time)
+                  .toLocaleTimeString()}
+              </td>
+
+              <td>${e.type}</td>
+
+            </tr>
+
+          `).join('')}
+
+        </tbody>
+
+      </table>
+    `;
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+// ============================================
+// INIT SCAN PAGE
+// ============================================
+
+async function initScanPage(token){
+
+  const deviceId = DB.getDeviceId();
+
+  try{
+
+    const res = await fetch(
+      `${API}/api/checkin`,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+          token,
+          deviceId
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(!data.ok &&
+       data.reason === 'expired'){
+
+      document.getElementById('formState')
+        .style.display = 'none';
+
+      document.getElementById('expiredState')
+        .style.display = 'block';
+
+      return;
+    }
+
+    if(!data.ok &&
+       data.reason === 'need_id'){
+
+      return;
+    }
+
+    showSuccess(data.userId);
+
+    renderLog();
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+// ============================================
+// SUBMIT ID
+// ============================================
+
+async function submitID(){
+
+  const userId =
+    document.getElementById('idInput')
+      .value
+      .trim();
+
+  const token =
+    new URLSearchParams(location.search)
+      .get('t');
+
+  if(!userId){
+
+    document.getElementById('errorMsg')
+      .textContent =
+      'Enter valid ID';
+
+    return;
+  }
+
+  const deviceId = DB.getDeviceId();
+
+  try{
+
+    const res = await fetch(
+      `${API}/api/checkin`,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+          token,
+          deviceId,
+          userId
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(!data.ok){
+
+      document.getElementById('errorMsg')
+        .textContent =
+        'QR Expired';
+
+      return;
+    }
+
+    showSuccess(data.userId);
+
+    renderLog();
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+// ============================================
+// SUCCESS
+// ============================================
+
+function showSuccess(userId){
+
+  document.getElementById('formState')
+    .style.display = 'none';
+
+  document.getElementById('successState')
+    .style.display = 'block';
+
+  document.getElementById('successID')
+    .textContent = userId;
+
+}
+
+// ============================================
+// EXPORT CSV
+// ============================================
+
+async function exportCSV(){
+
+  const res =
+    await fetch(`${API}/api/log`);
+
+  const log = await res.json();
+
+  if(!log.length){
+
+    alert('No data');
+
+    return;
+  }
+
+  const rows = [
+
+    ['#','User','Device','Time','Type'],
+
+    ...log.map((e,i)=>[
+      i+1,
+      e.userId,
+      e.deviceId,
+      e.time,
+      e.type
+    ])
+
+  ];
+
+  const csv =
+    rows.map(r=>r.join(','))
+      .join('\n');
+
+  const blob =
+    new Blob([csv], {
+      type:'text/csv'
+    });
+
+  const a =
+    document.createElement('a');
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    'attendance.csv';
+
+  a.click();
+
+}
+
+// ============================================
+// CLEAR
+// ============================================
+
+function clearLog(){
+
+  alert(
+    'Restart backend server to clear memory.'
+  );
+
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+
+function showPage(id){
+
+  document.querySelectorAll('.page')
+    .forEach(p =>
+      p.classList.remove('active')
+    );
+
+  document.querySelectorAll('nav button')
+    .forEach(b =>
+      b.classList.remove('active')
+    );
+
+  document.getElementById('page-' + id)
+    .classList.add('active');
+
+}
+
+// ============================================
+// BOOT
+// ============================================
+
+window.onload = async () => {
+
+  await fetchToken();
+
+  renderLog();
+
+  setInterval(updateTimer,1000);
+
+  const params =
+    new URLSearchParams(location.search);
+
+  if(params.get('scan') === '1'){
+
+    document.querySelectorAll('.page')
+      .forEach(p =>
+        p.classList.remove('active')
+      );
+
+    document.getElementById('page-scan')
+      .classList.add('active');
+
+    initScanPage(params.get('t'));
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
