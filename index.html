@@ -683,34 +683,45 @@ function showPage(id){
 // BOOT
 // ============================================
 
-const params =
-  new URLSearchParams(location.search);
-
-const isAdmin =
-  params.get('admin') === 'mocha123';
-
-if (!isAdmin) {
-
-  document.querySelector('nav')
-    .style.display = 'none';
-
-  document.getElementById('page-admin')
-    .style.display = 'none';
-
-}
-
- if (isAdmin) {
-
-  await fetchToken();
-
-  renderLog();
-
-  setInterval(updateTimer,1000);
-
-}
+window.onload = async () => {
 
   const params =
     new URLSearchParams(location.search);
+
+  // ============================================
+  // ADMIN PROTECTION
+  // ============================================
+
+  const isAdmin =
+    params.get('admin') === 'mocha123';
+
+  if (!isAdmin) {
+
+    document.querySelector('nav')
+      .style.display = 'none';
+
+    document.getElementById('page-admin')
+      .style.display = 'none';
+
+  }
+
+  // ============================================
+  // ADMIN MODE
+  // ============================================
+
+  if (isAdmin) {
+
+    await fetchToken();
+
+    renderLog();
+
+    setInterval(updateTimer,1000);
+
+  }
+
+  // ============================================
+  // SCAN MODE
+  // ============================================
 
   if(params.get('scan') === '1'){
 
