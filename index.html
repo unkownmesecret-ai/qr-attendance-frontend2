@@ -683,13 +683,31 @@ function showPage(id){
 // BOOT
 // ============================================
 
-window.onload = async () => {
+const params =
+  new URLSearchParams(location.search);
+
+const isAdmin =
+  params.get('admin') === 'mocha123';
+
+if (!isAdmin) {
+
+  document.querySelector('nav')
+    .style.display = 'none';
+
+  document.getElementById('page-admin')
+    .style.display = 'none';
+
+}
+
+ if (isAdmin) {
 
   await fetchToken();
 
   renderLog();
 
   setInterval(updateTimer,1000);
+
+}
 
   const params =
     new URLSearchParams(location.search);
