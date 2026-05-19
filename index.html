@@ -179,7 +179,91 @@
       background:var(--accent2);
       color:white;
     }
+.timerWrap{
+  margin-top:25px;
+}
 
+.timerBar{
+  width:100%;
+  height:18px;
+  background:#1e293b;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid #334155;
+}
+
+#timerFill{
+  height:100%;
+  width:100%;
+  background:#22c55e;
+  transition:
+    width 1s linear,
+    background 0.5s ease;
+}
+
+.qrFadeOut{
+  animation:fadeOut .35s ease forwards;
+}
+
+.qrFadeIn{
+  animation:fadeIn .35s ease forwards;
+}
+
+.qrShake{
+  animation:shake .35s ease;
+}
+
+@keyframes fadeOut{
+
+  from{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  to{
+    opacity:0;
+    transform:scale(.92);
+  }
+
+}
+
+@keyframes fadeIn{
+
+  from{
+    opacity:0;
+    transform:scale(.92);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+
+}
+
+@keyframes shake{
+
+  0%{
+    transform:translateX(0);
+  }
+
+  25%{
+    transform:translateX(-4px);
+  }
+
+  50%{
+    transform:translateX(4px);
+  }
+
+  75%{
+    transform:translateX(-4px);
+  }
+
+  100%{
+    transform:translateX(0);
+  }
+
+}
   </style>
 </head>
 
@@ -199,11 +283,14 @@
     <h1>QR Attendance</h1>
 
     <div id="qrcode"></div>
+    
+<div class="timerWrap">
 
-    <div class="timer">
-      Refreshes in:
-      <span id="timerNum">10</span>s
-    </div>
+  <div class="timerBar">
+    <div id="timerFill"></div>
+  </div>
+
+</div>
 
     <div class="token">
       Token:
@@ -399,12 +486,73 @@ function updateTimer(){
 
   timeLeft--;
 
-  if(timeLeft < 0){
-    timeLeft = 0;
+  const fill =
+    document.getElementById('timerFill');
+
+  const percent =
+    (timeLeft / TICK) * 100;
+
+  fill.style.width =
+    percent + '%';
+
+  // GREEN
+  if(percent > 60){
+
+    fill.style.background =
+      '#22c55e';
+
   }
 
-  document.getElementById('timerNum')
-    .textContent = timeLeft;
+  // YELLOW
+  else if(percent > 25){
+
+    fill.style.background =
+      '#eab308';
+
+  }
+
+  // RED
+  else{
+
+    fill.style.background =
+      '#ef4444';
+
+  }
+
+  // SHAKE AT END
+  if(timeLeft <= 5){
+
+    fill.classList.add('qrShake');
+
+    setTimeout(()=>{
+
+      fill.classList.remove('qrShake');
+
+    },350);
+
+  }
+
+  // REFRESH QR
+  if(timeLeft <= 0){
+
+    const qr =
+      document.getElementById('qrcode');
+
+    qr.classList.remove('qrFadeIn');
+
+    qr.classList.add('qrFadeOut');
+
+    setTimeout(async ()=>{
+
+      await fetchToken();
+
+      qr.classList.remove('qrFadeOut');
+
+      qr.classList.add('qrFadeIn');
+
+    },350);
+
+  }
 
 }
 
