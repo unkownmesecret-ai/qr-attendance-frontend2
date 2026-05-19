@@ -80,13 +80,10 @@
       margin-bottom:20px;
     }
 
-    #qrcode{
+ #qrcode{
   margin:20px auto;
   width:220px;
   height:220px;
-  background:white;
-  padding:10px;
-  border-radius:12px;
 
   display:flex;
   justify-content:center;
@@ -96,7 +93,6 @@
 #qrcode img,
 #qrcode canvas{
   display:block;
-  margin:auto;
 }
 
     .timer{
@@ -329,10 +325,13 @@ function buildQR(url){
   qrcode.innerHTML = '';
 
   new QRCode(qrcode, {
-    text:url,
-    width:220,
-    height:220
-  });
+  text:url,
+  width:200,
+  height:200,
+  colorDark:"#ffffff",
+  colorLight:"transparent",
+  correctLevel: QRCode.CorrectLevel.H
+});
 
 }
 
