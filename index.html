@@ -3,7 +3,10 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
   <title>QR Attendance</title>
 
@@ -15,7 +18,8 @@
       --bg:#0f172a;
       --card:#111827;
       --accent:#22c55e;
-      --accent2:#ef4444;
+      --danger:#ef4444;
+      --yellow:#eab308;
       --text:#f8fafc;
       --muted:#94a3b8;
       --border:#1e293b;
@@ -38,23 +42,23 @@
       display:flex;
       gap:10px;
       padding:20px;
-      border-bottom:1px solid var(--border);
       background:#0b1220;
+      border-bottom:1px solid var(--border);
     }
 
     nav button{
       padding:10px 18px;
       border:none;
-      border-radius:10px;
+      border-radius:12px;
       background:#1e293b;
       color:white;
       cursor:pointer;
+      font-weight:bold;
     }
 
     nav button.active{
       background:var(--accent);
       color:black;
-      font-weight:bold;
     }
 
     .page{
@@ -71,60 +75,62 @@
       margin:auto;
       background:var(--card);
       border:1px solid var(--border);
-      border-radius:20px;
+      border-radius:24px;
       padding:30px;
       text-align:center;
+      box-shadow:
+        0 0 40px rgba(0,0,0,.3);
     }
 
     h1{
       margin-bottom:20px;
     }
 
-#qrcode{
-  margin:20px auto;
+    #qrcode{
+      width:220px;
+      height:220px;
+      margin:20px auto;
 
-  width:220px;
-  height:220px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
 
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  border-radius:12px;
-}
-
-    .timer{
-      margin-top:20px;
-      font-size:24px;
-      font-weight:bold;
+      border-radius:20px;
+      overflow:hidden;
+      background:white;
     }
 
     .token{
       margin-top:15px;
       color:var(--muted);
-      word-break:break-all;
       font-size:12px;
+      word-break:break-all;
     }
 
     input{
       width:100%;
       padding:14px;
-      border-radius:12px;
-      border:none;
       margin-top:20px;
+
+      border:none;
+      border-radius:12px;
+
       background:#1e293b;
       color:white;
       font-size:16px;
     }
 
     button.submit{
-      margin-top:20px;
       width:100%;
       padding:14px;
+      margin-top:20px;
+
       border:none;
       border-radius:12px;
+
       background:var(--accent);
       color:black;
+
       font-size:16px;
       font-weight:bold;
       cursor:pointer;
@@ -132,13 +138,15 @@
 
     .success{
       color:var(--accent);
-      font-size:20px;
       margin-top:20px;
+      font-size:22px;
+      font-weight:bold;
     }
 
     .error{
-      color:var(--accent2);
-      margin-top:10px;
+      color:var(--danger);
+      margin-top:16px;
+      font-size:15px;
     }
 
     table{
@@ -148,8 +156,8 @@
     }
 
     th, td{
-      border-bottom:1px solid var(--border);
       padding:12px;
+      border-bottom:1px solid var(--border);
       text-align:left;
     }
 
@@ -161,136 +169,156 @@
       display:flex;
       gap:10px;
       margin-bottom:20px;
+      flex-wrap:wrap;
     }
 
     .controls button{
       padding:10px 16px;
       border:none;
-      border-radius:10px;
-      cursor:pointer;
+      border-radius:12px;
       font-weight:bold;
+      cursor:pointer;
     }
 
     .export{
       background:var(--accent);
+      color:black;
     }
 
     .clear{
-      background:var(--accent2);
+      background:var(--danger);
       color:white;
     }
-.timerWrap{
-  margin-top:25px;
-}
 
-.timerBar{
-  width:100%;
-  height:18px;
-  background:#1e293b;
-  border-radius:999px;
-  overflow:hidden;
-  border:1px solid #334155;
-}
+    .timerWrap{
+      margin-top:25px;
+    }
 
-#timerFill{
-  height:100%;
-  width:100%;
-  background:#22c55e;
-  transition:
-    width 1s linear,
-    background 0.5s ease;
-}
+    .timerBar{
+      width:100%;
+      height:18px;
+      background:#1e293b;
+      border-radius:999px;
+      overflow:hidden;
+      border:1px solid #334155;
+    }
 
-.qrFadeOut{
-  animation:fadeOut .35s ease forwards;
-}
+    #timerFill{
+      width:100%;
+      height:100%;
+      background:var(--accent);
 
-.qrFadeIn{
-  animation:fadeIn .35s ease forwards;
-}
+      transition:
+        width 1s linear,
+        background .4s ease;
+    }
 
-.qrShake{
-  animation:shake .35s ease;
-}
+    .qrFadeOut{
+      animation:fadeOut .35s ease forwards;
+    }
 
-@keyframes fadeOut{
+    .qrFadeIn{
+      animation:fadeIn .35s ease forwards;
+    }
 
-  from{
-    opacity:1;
-    transform:scale(1);
-  }
+    .qrShake{
+      animation:shake .35s ease;
+    }
 
-  to{
-    opacity:0;
-    transform:scale(.92);
-  }
+    @keyframes fadeOut{
 
-}
+      from{
+        opacity:1;
+        transform:scale(1);
+      }
 
-@keyframes fadeIn{
+      to{
+        opacity:0;
+        transform:scale(.92);
+      }
 
-  from{
-    opacity:0;
-    transform:scale(.92);
-  }
+    }
 
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
+    @keyframes fadeIn{
 
-}
+      from{
+        opacity:0;
+        transform:scale(.92);
+      }
 
-@keyframes shake{
+      to{
+        opacity:1;
+        transform:scale(1);
+      }
 
-  0%{
-    transform:translateX(0);
-  }
+    }
 
-  25%{
-    transform:translateX(-4px);
-  }
+    @keyframes shake{
 
-  50%{
-    transform:translateX(4px);
-  }
+      0%{
+        transform:translateX(0);
+      }
 
-  75%{
-    transform:translateX(-4px);
-  }
+      25%{
+        transform:translateX(-4px);
+      }
 
-  100%{
-    transform:translateX(0);
-  }
+      50%{
+        transform:translateX(4px);
+      }
 
-}
+      75%{
+        transform:translateX(-4px);
+      }
+
+      100%{
+        transform:translateX(0);
+      }
+
+    }
+
   </style>
 </head>
 
 <body>
 
 <nav>
-  <button class="active" onclick="showPage('admin')">Admin</button>
-  <button onclick="showPage('scan')">Scan</button>
+
+  <button
+    class="active"
+    onclick="showPage('admin')"
+  >
+    Admin
+  </button>
+
+  <button
+    onclick="showPage('scan')"
+  >
+    Scan
+  </button>
+
 </nav>
 
-<!-- ADMIN PAGE -->
+<!-- ADMIN -->
 
-<div class="page active" id="page-admin">
+<div
+  class="page active"
+  id="page-admin"
+>
 
   <div class="card">
 
     <h1>QR Attendance</h1>
 
     <div id="qrcode"></div>
-    
-<div class="timerWrap">
 
-  <div class="timerBar">
-    <div id="timerFill"></div>
-  </div>
+    <div class="timerWrap">
 
-</div>
+      <div class="timerBar">
+        <div id="timerFill"></div>
+      </div>
+
+    </div>
 
     <div class="token">
       Token:
@@ -299,22 +327,36 @@
 
   </div>
 
-  <div style="max-width:1000px;margin:auto;margin-top:40px;">
+  <div
+    style="
+      max-width:1000px;
+      margin:auto;
+      margin-top:40px;
+    "
+  >
 
     <div class="controls">
 
-      <button class="export" onclick="exportCSV()">
+      <button
+        class="export"
+        onclick="exportCSV()"
+      >
         Export CSV
       </button>
 
-      <button class="clear" onclick="clearLog()">
+      <button
+        class="clear"
+        onclick="clearLog()"
+      >
         Clear
       </button>
 
-      <button onclick="forceResetToken()">
-  Force Reset QR
-</button>
-      
+      <button
+        onclick="forceResetToken()"
+      >
+        Force Reset QR
+      </button>
+
     </div>
 
     <div id="logContainer"></div>
@@ -325,7 +367,10 @@
 
 <!-- SCAN PAGE -->
 
-<div class="page" id="page-scan">
+<div
+  class="page"
+  id="page-scan"
+>
 
   <div class="card">
 
@@ -346,11 +391,18 @@
         Check In
       </button>
 
-      <div class="error" id="errorMsg"></div>
+      <div
+        class="error"
+        id="errorMsg"
+      ></div>
 
     </div>
 
-    <div class="success" id="successState" style="display:none;">
+    <div
+      class="success"
+      id="successState"
+      style="display:none;"
+    >
       Attendance Recorded
       <br><br>
       ID:
@@ -371,58 +423,77 @@
 
 <script>
 
-const API = 'https://qr-attendance-backend-production-0d3b.up.railway.app';
+const API =
+'https://qr-attendance-backend-production-0d3b.up.railway.app';
 
 const TICK = 35;
 
 let timeLeft = TICK;
 
 // ============================================
-// DEVICE ID
+// DEVICE STORAGE
 // ============================================
 
 const DB = {
 
-  getDeviceId() {
+  getDeviceId(){
 
-    let id = localStorage.getItem('qr_device_id');
+    let id =
+      localStorage.getItem('qr_device_id');
 
-    if (!id) {
+    if(!id){
 
       id =
         'dev_' +
-        Math.random().toString(36).slice(2,10);
+        Math.random()
+          .toString(36)
+          .slice(2,10);
 
-      localStorage.setItem('qr_device_id', id);
+      localStorage.setItem(
+        'qr_device_id',
+        id
+      );
 
     }
 
     return id;
+
   }
 
 };
 
 // ============================================
-// QR
+// BUILD QR
 // ============================================
 
 function buildQR(url){
 
-  const qrcode =
+  const qr =
     document.getElementById('qrcode');
 
-  qrcode.innerHTML = '';
+  qr.innerHTML = '';
 
-  new QRCode(qrcode, {
-  text:url,
-  width:200,
-  height:200,
-  colorDark:"#000000",
-  colorLight:"#0f172a",
-  correctLevel:QRCode.CorrectLevel.H
-});
+  new QRCode(qr, {
+
+    text:url,
+
+    width:200,
+    height:200,
+
+    colorDark:"#000000",
+    colorLight:"#ffffff",
+
+    correctLevel:
+      QRCode.CorrectLevel.H
+
+  });
 
 }
+
+// ============================================
+// FORCE RESET
+// ============================================
+
 async function forceResetToken(){
 
   try{
@@ -436,7 +507,7 @@ async function forceResetToken(){
 
     await fetchToken();
 
-    alert('QR Token Reset');
+    alert('QR Reset Complete');
 
   }catch(err){
 
@@ -445,6 +516,7 @@ async function forceResetToken(){
   }
 
 }
+
 // ============================================
 // FETCH TOKEN
 // ============================================
@@ -461,10 +533,10 @@ async function fetchToken(){
 
     buildQR(data.url);
 
-    document.getElementById('tokenSpan')
-      .textContent = data.token;
+    document.getElementById(
+      'tokenSpan'
+    ).textContent = data.token;
 
-    // CALCULATE REAL REMAINING TIME
     timeLeft =
       Math.floor(
         (data.expires - Date.now()) / 1000
@@ -487,7 +559,9 @@ function updateTimer(){
   timeLeft--;
 
   const fill =
-    document.getElementById('timerFill');
+    document.getElementById(
+      'timerFill'
+    );
 
   const percent =
     (timeLeft / TICK) * 100;
@@ -496,6 +570,7 @@ function updateTimer(){
     percent + '%';
 
   // GREEN
+
   if(percent > 60){
 
     fill.style.background =
@@ -504,6 +579,7 @@ function updateTimer(){
   }
 
   // YELLOW
+
   else if(percent > 25){
 
     fill.style.background =
@@ -512,6 +588,7 @@ function updateTimer(){
   }
 
   // RED
+
   else{
 
     fill.style.background =
@@ -519,36 +596,50 @@ function updateTimer(){
 
   }
 
-  // SHAKE AT END
+  // SHAKE
+
   if(timeLeft <= 5){
 
     fill.classList.add('qrShake');
 
     setTimeout(()=>{
 
-      fill.classList.remove('qrShake');
+      fill.classList.remove(
+        'qrShake'
+      );
 
     },350);
 
   }
 
-  // REFRESH QR
+  // RESET
+
   if(timeLeft <= 0){
 
     const qr =
-      document.getElementById('qrcode');
+      document.getElementById(
+        'qrcode'
+      );
 
-    qr.classList.remove('qrFadeIn');
+    qr.classList.remove(
+      'qrFadeIn'
+    );
 
-    qr.classList.add('qrFadeOut');
+    qr.classList.add(
+      'qrFadeOut'
+    );
 
     setTimeout(async ()=>{
 
       await fetchToken();
 
-      qr.classList.remove('qrFadeOut');
+      qr.classList.remove(
+        'qrFadeOut'
+      );
 
-      qr.classList.add('qrFadeIn');
+      qr.classList.add(
+        'qrFadeIn'
+      );
 
     },350);
 
@@ -567,10 +658,13 @@ async function renderLog(){
     const res =
       await fetch(`${API}/api/log`);
 
-    const log = await res.json();
+    const log =
+      await res.json();
 
     const container =
-      document.getElementById('logContainer');
+      document.getElementById(
+        'logContainer'
+      );
 
     if(!log.length){
 
@@ -582,6 +676,7 @@ async function renderLog(){
     }
 
     container.innerHTML = `
+
       <table>
 
         <thead>
@@ -590,7 +685,7 @@ async function renderLog(){
             <th>#</th>
             <th>User</th>
             <th>Device</th>
-            <th>Date & Time</th>
+            <th>Time</th>
             <th>Type</th>
           </tr>
 
@@ -604,11 +699,11 @@ async function renderLog(){
 
               <td>${i+1}</td>
 
-              <td>${e.userId}</td>
+              <td>${e.userid}</td>
 
-              <td>${e.deviceId}</td>
+              <td>${e.deviceid}</td>
 
-             <td>${e.fullTime}</td>
+              <td>${e.fulltime}</td>
 
               <td>${e.type}</td>
 
@@ -619,6 +714,7 @@ async function renderLog(){
         </tbody>
 
       </table>
+
     `;
 
   }catch(err){
@@ -635,49 +731,69 @@ async function renderLog(){
 
 async function initScanPage(token){
 
-  const deviceId = DB.getDeviceId();
+  const deviceId =
+    DB.getDeviceId();
 
   try{
 
-    const res = await fetch(
-      `${API}/api/checkin`,
-      {
-        method:'POST',
+    const res =
+      await fetch(
+        `${API}/api/checkin`,
+        {
 
-        headers:{
-          'Content-Type':'application/json'
-        },
+          method:'POST',
 
-        body:JSON.stringify({
-          token,
-          deviceId
-        })
-      }
-    );
+          headers:{
+            'Content-Type':
+              'application/json'
+          },
 
-    const data = await res.json();
+          body:JSON.stringify({
 
-    if(!data.ok &&
-       data.reason === 'expired'){
+            token,
+            deviceId
 
-      document.getElementById('formState')
-        .style.display = 'none';
+          })
 
-      document.getElementById('expiredState')
-        .style.display = 'block';
+        }
+      );
+
+    const data =
+      await res.json();
+
+    if(
+      !data.ok &&
+      data.reason === 'expired'
+    ){
+
+      document.getElementById(
+        'formState'
+      ).style.display = 'none';
+
+      document.getElementById(
+        'expiredState'
+      ).style.display = 'block';
 
       return;
+
     }
 
-    if(!data.ok &&
-       data.reason === 'need_id'){
+    if(
+      !data.ok &&
+      data.reason === 'need_id'
+    ){
 
       return;
+
     }
 
-    showSuccess(data.userId);
+    if(data.ok){
 
-    renderLog();
+      showSuccess(data.userId);
+
+      renderLog();
+
+    }
 
   }catch(err){
 
@@ -694,71 +810,133 @@ async function initScanPage(token){
 async function submitID(){
 
   const userId =
-    document.getElementById('idInput')
-      .value
-      .trim();
+    document.getElementById(
+      'idInput'
+    )
+    .value
+    .trim();
 
   const token =
-    new URLSearchParams(location.search)
-      .get('t');
+    new URLSearchParams(
+      location.search
+    ).get('t');
 
   if(!userId){
 
-    document.getElementById('errorMsg')
-      .textContent =
+    document.getElementById(
+      'errorMsg'
+    ).textContent =
       'Enter valid ID';
 
     return;
+
   }
 
-  const deviceId = DB.getDeviceId();
+  const deviceId =
+    DB.getDeviceId();
 
   try{
 
-    const res = await fetch(
-      `${API}/api/checkin`,
-      {
-        method:'POST',
+    const res =
+      await fetch(
+        `${API}/api/checkin`,
+        {
 
-        headers:{
-          'Content-Type':'application/json'
-        },
+          method:'POST',
 
-        body:JSON.stringify({
-          token,
-          deviceId,
-          userId
-        })
-      }
-    );
+          headers:{
+            'Content-Type':
+              'application/json'
+          },
 
-    const data = await res.json();
+          body:JSON.stringify({
+
+            token,
+            deviceId,
+            userId
+
+          })
+
+        }
+      );
+
+    const data =
+      await res.json();
 
     if(!data.ok){
 
-      if(data.reason === 'scan_limit'){
+      // COOLDOWN
 
-        document.getElementById('errorMsg')
-          .textContent =
-          'Scan limit reached for this device';
+      if(data.reason === 'cooldown'){
+
+        document.getElementById(
+          'errorMsg'
+        ).textContent =
+          'Scan limit reached. Try again later.';
 
         return;
+
       }
+
+      // BLOCKED
+
+      if(data.reason === 'blocked'){
+
+        document.getElementById(
+          'errorMsg'
+        ).textContent =
+          'This device is blocked';
+
+        return;
+
+      }
+
+      // USER USED
 
       if(data.reason === 'user_taken'){
 
-        document.getElementById('errorMsg')
-          .textContent =
-          'This student ID is already used on another device';
+        document.getElementById(
+          'errorMsg'
+        ).textContent =
+          'Student ID already linked to another device';
 
         return;
+
       }
 
-      document.getElementById('errorMsg')
-        .textContent =
-        'QR Expired';
+      // ALREADY SCANNED
+
+      if(data.reason === 'already_scanned'){
+
+        document.getElementById(
+          'errorMsg'
+        ).textContent =
+          'Attendance already recorded';
+
+        return;
+
+      }
+
+      // EXPIRED
+
+      if(data.reason === 'expired'){
+
+        document.getElementById(
+          'errorMsg'
+        ).textContent =
+          'QR Expired';
+
+        return;
+
+      }
+
+      document.getElementById(
+        'errorMsg'
+      ).textContent =
+        'Check-in failed';
 
       return;
+
     }
 
     showSuccess(data.userId);
@@ -779,14 +957,17 @@ async function submitID(){
 
 function showSuccess(userId){
 
-  document.getElementById('formState')
-    .style.display = 'none';
+  document.getElementById(
+    'formState'
+  ).style.display = 'none';
 
-  document.getElementById('successState')
-    .style.display = 'block';
+  document.getElementById(
+    'successState'
+  ).style.display = 'block';
 
-  document.getElementById('successID')
-    .textContent = userId;
+  document.getElementById(
+    'successID'
+  ).textContent = userId;
 
 }
 
@@ -799,37 +980,47 @@ async function exportCSV(){
   const res =
     await fetch(`${API}/api/log`);
 
-  const log = await res.json();
+  const log =
+    await res.json();
 
   if(!log.length){
 
     alert('No data');
 
     return;
+
   }
 
   const rows = [
 
-    ['#','User','Device','Time','Type'],
+    [
+      '#',
+      'User',
+      'Device',
+      'Time',
+      'Type'
+    ],
 
     ...log.map((e,i)=>[
       i+1,
-      e.userId,
-      e.deviceId,
-      e.time,
+      e.userid,
+      e.deviceid,
+      e.fulltime,
       e.type
     ])
 
   ];
 
   const csv =
-    rows.map(r=>r.join(','))
+    rows
+      .map(r=>r.join(','))
       .join('\n');
 
   const blob =
-    new Blob([csv], {
-      type:'text/csv'
-    });
+    new Blob(
+      [csv],
+      { type:'text/csv' }
+    );
 
   const a =
     document.createElement('a');
@@ -851,7 +1042,7 @@ async function exportCSV(){
 function clearLog(){
 
   alert(
-    'Restart backend server to clear memory.'
+    'Clear directly from Supabase.'
   );
 
 }
@@ -862,17 +1053,20 @@ function clearLog(){
 
 function showPage(id){
 
-  document.querySelectorAll('.page')
+  document
+    .querySelectorAll('.page')
     .forEach(p =>
       p.classList.remove('active')
     );
 
-  document.querySelectorAll('nav button')
+  document
+    .querySelectorAll('nav button')
     .forEach(b =>
       b.classList.remove('active')
     );
 
-  document.getElementById('page-' + id)
+  document
+    .getElementById('page-' + id)
     .classList.add('active');
 
 }
@@ -881,61 +1075,62 @@ function showPage(id){
 // BOOT
 // ============================================
 
-window.onload = async () => {
+window.onload = async ()=>{
 
   const params =
-    new URLSearchParams(location.search);
-
-  // ============================================
-  // ADMIN PROTECTION
-  // ============================================
+    new URLSearchParams(
+      location.search
+    );
 
   const isAdmin =
     params.get('admin') === 'mocha123';
 
-  if (!isAdmin) {
+  // HIDE ADMIN
+
+  if(!isAdmin){
 
     document.querySelector('nav')
       .style.display = 'none';
 
-    document.getElementById('page-admin')
-      .style.display = 'none';
+    document.getElementById(
+      'page-admin'
+    ).style.display = 'none';
 
   }
 
-  // ============================================
   // ADMIN MODE
-  // ============================================
 
-if (isAdmin) {
+  if(isAdmin){
 
-  await fetchToken();
+    await fetchToken();
 
-  setInterval(fetchToken, 5000);
+    renderLog();
 
-  renderLog();
+    setInterval(fetchToken,5000);
 
-  setInterval(renderLog, 10000);
+    setInterval(renderLog,10000);
 
-  setInterval(updateTimer,1000);
+    setInterval(updateTimer,1000);
 
-}
+  }
 
-  // ============================================
   // SCAN MODE
-  // ============================================
 
   if(params.get('scan') === '1'){
 
-    document.querySelectorAll('.page')
+    document
+      .querySelectorAll('.page')
       .forEach(p =>
         p.classList.remove('active')
       );
 
-    document.getElementById('page-scan')
+    document
+      .getElementById('page-scan')
       .classList.add('active');
 
-    initScanPage(params.get('t'));
+    initScanPage(
+      params.get('t')
+    );
 
   }
 
