@@ -1,18 +1,1090 @@
-<div style="margin-top:40px;">
+<!DOCTYPE html>
+<html lang="en">
 
-  <h2>
-    Device Moderation
-  </h2>
+<head>
 
-  <div id="deviceContainer"></div>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0"
+/>
+
+<title>QR Attendance</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+
+:root{
+
+  --bg:#0f172a;
+  --card:#111827;
+  --border:#1e293b;
+
+  --green:#22c55e;
+  --yellow:#eab308;
+  --red:#ef4444;
+
+  --text:#f8fafc;
+  --muted:#94a3b8;
+
+}
+
+*{
+
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+
+}
+
+body{
+
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+
+}
+
+/* ============================================
+NAV
+============================================ */
+
+nav{
+
+  display:flex;
+  gap:10px;
+
+  padding:20px;
+
+  background:#0b1220;
+
+  border-bottom:1px solid var(--border);
+
+}
+
+nav button{
+
+  border:none;
+
+  padding:12px 18px;
+
+  border-radius:12px;
+
+  background:#1e293b;
+
+  color:white;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+}
+
+nav button.active{
+
+  background:var(--green);
+
+  color:black;
+
+}
+
+/* ============================================
+PAGES
+============================================ */
+
+.page{
+
+  display:none;
+
+  padding:30px;
+
+}
+
+.page.active{
+
+  display:block;
+
+}
+
+/* ============================================
+CARD
+============================================ */
+
+.card{
+
+  max-width:520px;
+
+  margin:auto;
+
+  background:var(--card);
+
+  border:1px solid var(--border);
+
+  border-radius:24px;
+
+  padding:30px;
+
+  text-align:center;
+
+  box-shadow:
+    0 0 30px rgba(0,0,0,.25);
+
+}
+
+h1{
+
+  margin-bottom:20px;
+
+}
+
+/* ============================================
+QR
+============================================ */
+
+#qrcode{
+
+  width:220px;
+  height:220px;
+
+  margin:auto;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:20px;
+
+  overflow:hidden;
+
+  background:#0b1220;
+
+}
+
+/* ============================================
+TOKEN
+============================================ */
+
+.token{
+
+  margin-top:18px;
+
+  color:var(--muted);
+
+  font-size:12px;
+
+  word-break:break-all;
+
+}
+
+/* ============================================
+INPUT
+============================================ */
+
+input{
+
+  width:100%;
+
+  padding:15px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#1e293b;
+
+  color:white;
+
+  margin-top:20px;
+
+  font-size:16px;
+
+}
+
+/* ============================================
+BUTTONS
+============================================ */
+
+button.submit{
+
+  width:100%;
+
+  margin-top:18px;
+
+  padding:15px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:var(--green);
+
+  color:black;
+
+  font-size:16px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+/* ============================================
+SUCCESS / ERROR
+============================================ */
+
+.success{
+
+  margin-top:20px;
+
+  color:var(--green);
+
+  font-size:22px;
+
+  font-weight:bold;
+
+}
+
+.error{
+
+  margin-top:15px;
+
+  color:var(--red);
+
+  font-weight:bold;
+
+}
+
+/* ============================================
+TABLES
+============================================ */
+
+.tableWrap{
+
+  overflow-x:auto;
+
+}
+
+table{
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  margin-top:20px;
+
+  min-width:900px;
+
+}
+
+th{
+
+  color:var(--muted);
+
+  text-align:left;
+
+  padding:14px;
+
+  border-bottom:1px solid var(--border);
+
+}
+
+td{
+
+  padding:14px;
+
+  border-bottom:1px solid var(--border);
+
+}
+
+tr:hover{
+
+  background:#0b1220;
+
+}
+
+/* ============================================
+CONTROLS
+============================================ */
+
+.controls{
+
+  display:flex;
+
+  gap:10px;
+
+  margin-bottom:20px;
+
+  flex-wrap:wrap;
+
+}
+
+.controls button{
+
+  border:none;
+
+  padding:12px 16px;
+
+  border-radius:10px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+}
+
+.export{
+
+  background:var(--green);
+
+  color:black;
+
+}
+
+.clear{
+
+  background:var(--red);
+
+  color:white;
+
+}
+
+/* ============================================
+TIMER BAR
+============================================ */
+
+.timerWrap{
+
+  margin-top:25px;
+
+}
+
+.timerBar{
+
+  width:100%;
+
+  height:18px;
+
+  background:#1e293b;
+
+  border-radius:999px;
+
+  overflow:hidden;
+
+  border:1px solid #334155;
+
+}
+
+#timerFill{
+
+  height:100%;
+
+  width:100%;
+
+  background:var(--green);
+
+  transition:
+    width 1s linear,
+    background .3s ease;
+
+}
+
+/* ============================================
+ANIMATIONS
+============================================ */
+
+.qrFadeOut{
+
+  animation:fadeOut .35s ease forwards;
+
+}
+
+.qrFadeIn{
+
+  animation:fadeIn .35s ease forwards;
+
+}
+
+.qrShake{
+
+  animation:shake .35s ease;
+
+}
+
+@keyframes fadeOut{
+
+  from{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  to{
+    opacity:0;
+    transform:scale(.92);
+  }
+
+}
+
+@keyframes fadeIn{
+
+  from{
+    opacity:0;
+    transform:scale(.92);
+  }
+
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+
+}
+
+@keyframes shake{
+
+  0%{
+    transform:translateX(0);
+  }
+
+  25%{
+    transform:translateX(-4px);
+  }
+
+  50%{
+    transform:translateX(4px);
+  }
+
+  75%{
+    transform:translateX(-4px);
+  }
+
+  100%{
+    transform:translateX(0);
+  }
+
+}
+
+/* ============================================
+MODERATION PANEL
+============================================ */
+
+.moderationCard{
+
+  margin-top:40px;
+
+  background:#111827;
+
+  border:1px solid var(--border);
+
+  border-radius:24px;
+
+  padding:25px;
+
+}
+
+.moderationHeader{
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+  margin-bottom:20px;
+
+}
+
+.refreshBtn{
+
+  background:var(--green);
+
+  color:black;
+
+  border:none;
+
+  padding:10px 16px;
+
+  border-radius:10px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+}
+
+.statusBlocked{
+
+  color:var(--red);
+
+  font-weight:bold;
+
+}
+
+.statusActive{
+
+  color:var(--green);
+
+  font-weight:bold;
+
+}
+
+.actionButtons{
+
+  display:flex;
+
+  gap:8px;
+
+  flex-wrap:wrap;
+
+}
+
+.actionButtons button{
+
+  border:none;
+
+  padding:8px 12px;
+
+  border-radius:8px;
+
+  cursor:pointer;
+
+  font-weight:bold;
+
+}
+
+.btnBlock{
+
+  background:var(--red);
+
+  color:white;
+
+}
+
+.btnUnblock{
+
+  background:var(--green);
+
+  color:black;
+
+}
+
+.btnBonus{
+
+  background:#3b82f6;
+
+  color:white;
+
+}
+
+.btnReset{
+
+  background:#f59e0b;
+
+  color:black;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ============================================
+NAV
+============================================ -->
+
+<nav>
+
+  <button
+    class="active"
+    onclick="showPage('admin')"
+  >
+    Admin
+  </button>
+
+  <button
+    onclick="showPage('scan')"
+  >
+    Scan
+  </button>
+
+</nav>
+
+<!-- ============================================
+ADMIN PAGE
+============================================ -->
+
+<div
+  class="page active"
+  id="page-admin"
+>
+
+  <div class="card">
+
+    <h1>QR Attendance</h1>
+
+    <div id="qrcode"></div>
+
+    <div class="timerWrap">
+
+      <div class="timerBar">
+
+        <div id="timerFill"></div>
+
+      </div>
+
+    </div>
+
+    <div class="token">
+
+      Token:
+
+      <span id="tokenSpan"></span>
+
+    </div>
+
+  </div>
+
+  <!-- CONTROLS -->
+
+  <div
+    style="
+      max-width:1200px;
+      margin:auto;
+      margin-top:40px;
+    "
+  >
+
+    <div class="controls">
+
+      <button
+        class="export"
+        onclick="exportCSV()"
+      >
+        Export CSV
+      </button>
+
+      <button
+        class="clear"
+        onclick="clearLog()"
+      >
+        Clear
+      </button>
+
+      <button
+        onclick="forceResetToken()"
+      >
+        Force Reset QR
+      </button>
+
+    </div>
+
+    <!-- LOG TABLE -->
+
+    <div class="tableWrap">
+
+      <div id="logContainer"></div>
+
+    </div>
+
+    <!-- MODERATION -->
+
+    <div class="moderationCard">
+
+      <div class="moderationHeader">
+
+        <h2>Device Moderation</h2>
+
+        <button
+          class="refreshBtn"
+          onclick="renderDevices()"
+        >
+          Refresh
+        </button>
+
+      </div>
+
+      <div class="tableWrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>User</th>
+              <th>Device</th>
+              <th>Scans</th>
+              <th>Max</th>
+              <th>Status</th>
+              <th>Cooldown</th>
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="deviceContainer">
+
+            <tr>
+
+              <td colspan="7">
+                Loading...
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ============================================
+SCAN PAGE
+============================================ -->
+
+<div
+  class="page"
+  id="page-scan"
+>
+
+  <div class="card">
+
+    <h1>Student Check-In</h1>
+
+    <div id="formState">
+
+      <input
+        id="idInput"
+        type="text"
+        placeholder="Enter Student ID"
+      />
+
+      <button
+        class="submit"
+        onclick="submitID()"
+      >
+        Check In
+      </button>
+
+      <div
+        class="error"
+        id="errorMsg"
+      ></div>
+
+    </div>
+
+    <div
+      class="success"
+      id="successState"
+      style="display:none;"
+    >
+
+      Attendance Recorded
+
+      <br><br>
+
+      ID:
+
+      <span id="successID"></span>
+
+    </div>
+
+    <div
+      class="error"
+      id="expiredState"
+      style="display:none;"
+    >
+
+      QR Expired. Scan Again.
+
+    </div>
+
+  </div>
 
 </div>
 
 <script>
 
-// ============================================
-// DEVICE PANEL
-// ============================================
+const API =
+'https://qr-attendance-backend-production-0d3b.up.railway.app';
+
+const TICK = 35;
+
+let timeLeft = TICK;
+
+/* ============================================
+DEVICE ID
+============================================ */
+
+const DB = {
+
+  getDeviceId(){
+
+    let id =
+      localStorage.getItem(
+        'qr_device_id'
+      );
+
+    if(!id){
+
+      id =
+        'dev_' +
+        Math.random()
+          .toString(36)
+          .slice(2,10);
+
+      localStorage.setItem(
+        'qr_device_id',
+        id
+      );
+
+    }
+
+    return id;
+
+  }
+
+};
+
+/* ============================================
+QR
+============================================ */
+
+function buildQR(url){
+
+  const qrcode =
+    document.getElementById('qrcode');
+
+  qrcode.innerHTML = '';
+
+  new QRCode(qrcode, {
+
+    text:url,
+
+    width:200,
+
+    height:200,
+
+    colorDark:"#000000",
+
+    colorLight:"#0f172a",
+
+    correctLevel:
+      QRCode.CorrectLevel.H
+
+  });
+
+}
+
+/* ============================================
+TOKEN
+============================================ */
+
+async function fetchToken(){
+
+  try{
+
+    const res =
+      await fetch(`${API}/api/token`);
+
+    const data =
+      await res.json();
+
+    buildQR(data.url);
+
+    document
+      .getElementById('tokenSpan')
+      .textContent = data.token;
+
+    timeLeft =
+      Math.floor(
+        (data.expires - Date.now()) / 1000
+      );
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
+
+/* ============================================
+FORCE RESET
+============================================ */
+
+async function forceResetToken(){
+
+  await fetch(
+    `${API}/api/reset-token`,
+    {
+      method:'POST'
+    }
+  );
+
+  fetchToken();
+
+}
+
+/* ============================================
+TIMER
+============================================ */
+
+function updateTimer(){
+
+  timeLeft--;
+
+  const fill =
+    document.getElementById(
+      'timerFill'
+    );
+
+  const percent =
+    (timeLeft / TICK) * 100;
+
+  fill.style.width =
+    percent + '%';
+
+  if(percent > 60){
+
+    fill.style.background =
+      '#22c55e';
+
+  }
+
+  else if(percent > 25){
+
+    fill.style.background =
+      '#eab308';
+
+  }
+
+  else{
+
+    fill.style.background =
+      '#ef4444';
+
+  }
+
+  if(timeLeft <= 5){
+
+    fill.classList.add('qrShake');
+
+    setTimeout(()=>{
+
+      fill.classList.remove(
+        'qrShake'
+      );
+
+    },350);
+
+  }
+
+  if(timeLeft <= 0){
+
+    const qr =
+      document.getElementById(
+        'qrcode'
+      );
+
+    qr.classList.add(
+      'qrFadeOut'
+    );
+
+    setTimeout(async ()=>{
+
+      await fetchToken();
+
+      qr.classList.remove(
+        'qrFadeOut'
+      );
+
+      qr.classList.add(
+        'qrFadeIn'
+      );
+
+    },350);
+
+  }
+
+}
+
+/* ============================================
+LOG TABLE
+============================================ */
+
+async function renderLog(){
+
+  const res =
+    await fetch(`${API}/api/log`);
+
+  const log =
+    await res.json();
+
+  const container =
+    document.getElementById(
+      'logContainer'
+    );
+
+  container.innerHTML = `
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>#</th>
+          <th>User</th>
+          <th>Device</th>
+          <th>Date & Time</th>
+          <th>Type</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        ${log.map((e,i)=>`
+
+          <tr>
+
+            <td>${i+1}</td>
+
+            <td>${e.userid}</td>
+
+            <td>${e.deviceid}</td>
+
+            <td>${e.fulltime}</td>
+
+            <td>${e.type}</td>
+
+          </tr>
+
+        `).join('')}
+
+      </tbody>
+
+    </table>
+
+  `;
+
+}
+
+/* ============================================
+DEVICE MODERATION
+============================================ */
 
 async function renderDevices(){
 
@@ -27,100 +1099,90 @@ async function renderDevices(){
       'deviceContainer'
     );
 
-  if(!devices.length){
+  container.innerHTML =
+    devices.map(d => `
 
-    container.innerHTML =
-      '<p>No devices yet.</p>';
+      <tr>
 
-    return;
+        <td>${d.userid}</td>
 
-  }
+        <td>${d.deviceid}</td>
 
-  container.innerHTML = `
+        <td>${d.scan_count}</td>
 
-    <table>
+        <td>${d.max_scans}</td>
 
-      <thead>
+        <td>
 
-        <tr>
+          <span class="${
+            d.is_blocked
+              ? 'statusBlocked'
+              : 'statusActive'
+          }">
 
-          <th>User</th>
-          <th>Device</th>
-          <th>Scans</th>
-          <th>Max</th>
-          <th>Blocked</th>
-          <th>Cooldown</th>
-          <th>Actions</th>
+            ${
+              d.is_blocked
+                ? 'BLOCKED'
+                : 'ACTIVE'
+            }
 
-        </tr>
+          </span>
 
-      </thead>
+        </td>
 
-      <tbody>
+        <td>
 
-        ${devices.map(d => `
+          ${
+            d.cooldown_until || '-'
+          }
 
-          <tr>
+        </td>
 
-            <td>${d.userid}</td>
+        <td>
 
-            <td>${d.deviceid}</td>
+          <div class="actionButtons">
 
-            <td>${d.scan_count}</td>
+            <button
+              class="btnBlock"
+              onclick="blockDevice('${d.deviceid}')"
+            >
+              Block
+            </button>
 
-            <td>${d.max_scans}</td>
+            <button
+              class="btnUnblock"
+              onclick="unblockDevice('${d.deviceid}')"
+            >
+              Unblock
+            </button>
 
-            <td>
-              ${d.is_blocked ? 'YES' : 'NO'}
-            </td>
+            <button
+              class="btnBonus"
+              onclick="bonusScan('${d.deviceid}')"
+            >
+              Bonus
+            </button>
 
-            <td>
-              ${d.cooldown_until || '-'}
-            </td>
+            <button
+              class="btnReset"
+              onclick="resetCooldown('${d.deviceid}')"
+            >
+              Reset
+            </button>
 
-            <td>
+          </div>
 
-              <button
-                onclick="blockDevice('${d.deviceid}')"
-              >
-                Block
-              </button>
+        </td>
 
-              <button
-                onclick="unblockDevice('${d.deviceid}')"
-              >
-                Unblock
-              </button>
+      </tr>
 
-              <button
-                onclick="bonusScan('${d.deviceid}')"
-              >
-                Bonus
-              </button>
-
-              <button
-                onclick="resetCooldown('${d.deviceid}')"
-              >
-                Reset
-              </button>
-
-            </td>
-
-          </tr>
-
-        `).join('')}
-
-      </tbody>
-
-    </table>
-
-  `;
+    `).join('');
 
 }
 
-// ============================================
-// ACTIONS
-// ============================================
+/* ============================================
+ACTIONS
+============================================ */
 
 async function blockDevice(deviceId){
 
@@ -215,4 +1277,319 @@ async function bonusScan(deviceId){
 
 }
 
+/* ============================================
+SCAN
+============================================ */
+
+async function initScanPage(token){
+
+  const deviceId =
+    DB.getDeviceId();
+
+  const res =
+    await fetch(
+      `${API}/api/checkin`,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+
+          token,
+
+          deviceId
+
+        })
+
+      }
+    );
+
+  const data =
+    await res.json();
+
+  if(!data.ok){
+
+    if(data.reason === 'need_id'){
+
+      return;
+
+    }
+
+    if(data.reason === 'cooldown'){
+
+      document
+        .getElementById('errorMsg')
+        .textContent =
+        'Scan cooldown active';
+
+      return;
+
+    }
+
+    if(data.reason === 'blocked'){
+
+      document
+        .getElementById('errorMsg')
+        .textContent =
+        'Device blocked';
+
+      return;
+
+    }
+
+  }
+
+  showSuccess(data.userId);
+
+}
+
+/* ============================================
+SUBMIT
+============================================ */
+
+async function submitID(){
+
+  const userId =
+    document
+      .getElementById('idInput')
+      .value
+      .trim();
+
+  if(!userId){
+
+    return;
+
+  }
+
+  const token =
+    new URLSearchParams(
+      location.search
+    ).get('t');
+
+  const deviceId =
+    DB.getDeviceId();
+
+  const res =
+    await fetch(
+      `${API}/api/checkin`,
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+
+          token,
+
+          deviceId,
+
+          userId
+
+        })
+
+      }
+    );
+
+  const data =
+    await res.json();
+
+  if(!data.ok){
+
+    document
+      .getElementById('errorMsg')
+      .textContent =
+      data.reason;
+
+    return;
+
+  }
+
+  showSuccess(data.userId);
+
+}
+
+/* ============================================
+SUCCESS
+============================================ */
+
+function showSuccess(userId){
+
+  document
+    .getElementById('formState')
+    .style.display =
+    'none';
+
+  document
+    .getElementById('successState')
+    .style.display =
+    'block';
+
+  document
+    .getElementById('successID')
+    .textContent =
+    userId;
+
+}
+
+/* ============================================
+EXPORT
+============================================ */
+
+async function exportCSV(){
+
+  const res =
+    await fetch(`${API}/api/log`);
+
+  const log =
+    await res.json();
+
+  const rows = [
+
+    [
+      '#',
+      'User',
+      'Device',
+      'Time',
+      'Type'
+    ],
+
+    ...log.map((e,i)=>[
+
+      i+1,
+
+      e.userid,
+
+      e.deviceid,
+
+      e.fulltime,
+
+      e.type
+
+    ])
+
+  ];
+
+  const csv =
+    rows.map(r=>r.join(','))
+      .join('\n');
+
+  const blob =
+    new Blob([csv],{
+      type:'text/csv'
+    });
+
+  const a =
+    document.createElement('a');
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    'attendance.csv';
+
+  a.click();
+
+}
+
+/* ============================================
+CLEAR
+============================================ */
+
+function clearLog(){
+
+  alert(
+    'Clear directly in Supabase.'
+  );
+
+}
+
+/* ============================================
+NAVIGATION
+============================================ */
+
+function showPage(id){
+
+  document
+    .querySelectorAll('.page')
+    .forEach(p =>
+      p.classList.remove('active')
+    );
+
+  document
+    .getElementById('page-' + id)
+    .classList.add('active');
+
+}
+
+/* ============================================
+BOOT
+============================================ */
+
+window.onload = async ()=>{
+
+  const params =
+    new URLSearchParams(
+      location.search
+    );
+
+  const isAdmin =
+    params.get('admin') === 'mocha123';
+
+  if(!isAdmin){
+
+    document.querySelector('nav')
+      .style.display = 'none';
+
+    document
+      .getElementById('page-admin')
+      .style.display = 'none';
+
+  }
+
+  if(isAdmin){
+
+    await fetchToken();
+
+    renderLog();
+
+    renderDevices();
+
+    setInterval(fetchToken,5000);
+
+    setInterval(updateTimer,1000);
+
+    setInterval(renderLog,10000);
+
+    setInterval(renderDevices,10000);
+
+  }
+
+  if(params.get('scan') === '1'){
+
+    document
+      .querySelectorAll('.page')
+      .forEach(p =>
+        p.classList.remove('active')
+      );
+
+    document
+      .getElementById('page-scan')
+      .classList.add('active');
+
+    initScanPage(
+      params.get('t')
+    );
+
+  }
+
+};
+
 </script>
+
+</body>
+</html>
