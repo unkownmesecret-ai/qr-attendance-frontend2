@@ -224,6 +224,10 @@
         Clear
       </button>
 
+      <button onclick="forceResetToken()">
+  Force Reset QR
+</button>
+      
     </div>
 
     <div id="logContainer"></div>
@@ -332,7 +336,28 @@ function buildQR(url){
 });
 
 }
+async function forceResetToken(){
 
+  try{
+
+    await fetch(
+      `${API}/api/reset-token`,
+      {
+        method:'POST'
+      }
+    );
+
+    await fetchToken();
+
+    alert('QR Token Reset');
+
+  }catch(err){
+
+    console.error(err);
+
+  }
+
+}
 // ============================================
 // FETCH TOKEN
 // ============================================
@@ -417,7 +442,7 @@ async function renderLog(){
             <th>#</th>
             <th>User</th>
             <th>Device</th>
-            <th>Time</th>
+            <th>Date & Time</th>
             <th>Type</th>
           </tr>
 
@@ -435,10 +460,7 @@ async function renderLog(){
 
               <td>${e.deviceId}</td>
 
-              <td>
-                ${new Date(e.time)
-                  .toLocaleTimeString()}
-              </td>
+             <td>${e.fullTime}</td>
 
               <td>${e.type}</td>
 
@@ -737,13 +759,15 @@ window.onload = async () => {
   // ADMIN MODE
   // ============================================
 
- if (isAdmin) {
+if (isAdmin) {
 
   await fetchToken();
 
   setInterval(fetchToken, 5000);
 
   renderLog();
+
+  setInterval(renderLog, 10000);
 
   setInterval(updateTimer,1000);
 
