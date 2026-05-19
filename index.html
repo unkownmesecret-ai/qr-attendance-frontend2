@@ -80,19 +80,17 @@
       margin-bottom:20px;
     }
 
- #qrcode{
+#qrcode{
   margin:20px auto;
+
   width:220px;
   height:220px;
 
   display:flex;
   justify-content:center;
   align-items:center;
-}
 
-#qrcode img,
-#qrcode canvas{
-  display:block;
+  border-radius:12px;
 }
 
     .timer{
@@ -329,8 +327,8 @@ function buildQR(url){
   width:200,
   height:200,
   colorDark:"#ffffff",
-  colorLight:"transparent",
-  correctLevel: QRCode.CorrectLevel.H
+  colorLight:"#0f172a",
+  correctLevel:QRCode.CorrectLevel.H
 });
 
 }
