@@ -566,6 +566,24 @@ async function submitID(){
 
     if(!data.ok){
 
+      if(data.reason === 'scan_limit'){
+
+        document.getElementById('errorMsg')
+          .textContent =
+          'Scan limit reached for this device';
+
+        return;
+      }
+
+      if(data.reason === 'user_taken'){
+
+        document.getElementById('errorMsg')
+          .textContent =
+          'This student ID is already used on another device';
+
+        return;
+      }
+
       document.getElementById('errorMsg')
         .textContent =
         'QR Expired';
