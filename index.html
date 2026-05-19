@@ -1,1142 +1,218 @@
-<!DOCTYPE html>
-<html lang="en">
+<div style="margin-top:40px;">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <h2>
+    Device Moderation
+  </h2>
 
-  <title>QR Attendance</title>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <style>
-
-    :root{
-      --bg:#0f172a;
-      --card:#111827;
-      --accent:#22c55e;
-      --danger:#ef4444;
-      --yellow:#eab308;
-      --text:#f8fafc;
-      --muted:#94a3b8;
-      --border:#1e293b;
-    }
-
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, Helvetica, sans-serif;
-    }
-
-    body{
-      background:var(--bg);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    nav{
-      display:flex;
-      gap:10px;
-      padding:20px;
-      background:#0b1220;
-      border-bottom:1px solid var(--border);
-    }
-
-    nav button{
-      padding:10px 18px;
-      border:none;
-      border-radius:12px;
-      background:#1e293b;
-      color:white;
-      cursor:pointer;
-      font-weight:bold;
-    }
-
-    nav button.active{
-      background:var(--accent);
-      color:black;
-    }
-
-    .page{
-      display:none;
-      padding:30px;
-    }
-
-    .page.active{
-      display:block;
-    }
-
-    .card{
-      max-width:500px;
-      margin:auto;
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:24px;
-      padding:30px;
-      text-align:center;
-      box-shadow:
-        0 0 40px rgba(0,0,0,.3);
-    }
-
-    h1{
-      margin-bottom:20px;
-    }
-
-    #qrcode{
-      width:220px;
-      height:220px;
-      margin:20px auto;
-
-      display:flex;
-      justify-content:center;
-      align-items:center;
-
-      border-radius:20px;
-      overflow:hidden;
-      background:white;
-    }
-
-    .token{
-      margin-top:15px;
-      color:var(--muted);
-      font-size:12px;
-      word-break:break-all;
-    }
-
-    input{
-      width:100%;
-      padding:14px;
-      margin-top:20px;
-
-      border:none;
-      border-radius:12px;
-
-      background:#1e293b;
-      color:white;
-      font-size:16px;
-    }
-
-    button.submit{
-      width:100%;
-      padding:14px;
-      margin-top:20px;
-
-      border:none;
-      border-radius:12px;
-
-      background:var(--accent);
-      color:black;
-
-      font-size:16px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .success{
-      color:var(--accent);
-      margin-top:20px;
-      font-size:22px;
-      font-weight:bold;
-    }
-
-    .error{
-      color:var(--danger);
-      margin-top:16px;
-      font-size:15px;
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:20px;
-    }
-
-    th, td{
-      padding:12px;
-      border-bottom:1px solid var(--border);
-      text-align:left;
-    }
-
-    th{
-      color:var(--muted);
-    }
-
-    .controls{
-      display:flex;
-      gap:10px;
-      margin-bottom:20px;
-      flex-wrap:wrap;
-    }
-
-    .controls button{
-      padding:10px 16px;
-      border:none;
-      border-radius:12px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .export{
-      background:var(--accent);
-      color:black;
-    }
-
-    .clear{
-      background:var(--danger);
-      color:white;
-    }
-
-    .timerWrap{
-      margin-top:25px;
-    }
-
-    .timerBar{
-      width:100%;
-      height:18px;
-      background:#1e293b;
-      border-radius:999px;
-      overflow:hidden;
-      border:1px solid #334155;
-    }
-
-    #timerFill{
-      width:100%;
-      height:100%;
-      background:var(--accent);
-
-      transition:
-        width 1s linear,
-        background .4s ease;
-    }
-
-    .qrFadeOut{
-      animation:fadeOut .35s ease forwards;
-    }
-
-    .qrFadeIn{
-      animation:fadeIn .35s ease forwards;
-    }
-
-    .qrShake{
-      animation:shake .35s ease;
-    }
-
-    @keyframes fadeOut{
-
-      from{
-        opacity:1;
-        transform:scale(1);
-      }
-
-      to{
-        opacity:0;
-        transform:scale(.92);
-      }
-
-    }
-
-    @keyframes fadeIn{
-
-      from{
-        opacity:0;
-        transform:scale(.92);
-      }
-
-      to{
-        opacity:1;
-        transform:scale(1);
-      }
-
-    }
-
-    @keyframes shake{
-
-      0%{
-        transform:translateX(0);
-      }
-
-      25%{
-        transform:translateX(-4px);
-      }
-
-      50%{
-        transform:translateX(4px);
-      }
-
-      75%{
-        transform:translateX(-4px);
-      }
-
-      100%{
-        transform:translateX(0);
-      }
-
-    }
-
-  </style>
-</head>
-
-<body>
-
-<nav>
-
-  <button
-    class="active"
-    onclick="showPage('admin')"
-  >
-    Admin
-  </button>
-
-  <button
-    onclick="showPage('scan')"
-  >
-    Scan
-  </button>
-
-</nav>
-
-<!-- ADMIN -->
-
-<div
-  class="page active"
-  id="page-admin"
->
-
-  <div class="card">
-
-    <h1>QR Attendance</h1>
-
-    <div id="qrcode"></div>
-
-    <div class="timerWrap">
-
-      <div class="timerBar">
-        <div id="timerFill"></div>
-      </div>
-
-    </div>
-
-    <div class="token">
-      Token:
-      <span id="tokenSpan"></span>
-    </div>
-
-  </div>
-
-  <div
-    style="
-      max-width:1000px;
-      margin:auto;
-      margin-top:40px;
-    "
-  >
-
-    <div class="controls">
-
-      <button
-        class="export"
-        onclick="exportCSV()"
-      >
-        Export CSV
-      </button>
-
-      <button
-        class="clear"
-        onclick="clearLog()"
-      >
-        Clear
-      </button>
-
-      <button
-        onclick="forceResetToken()"
-      >
-        Force Reset QR
-      </button>
-
-    </div>
-
-    <div id="logContainer"></div>
-
-  </div>
-
-</div>
-
-<!-- SCAN PAGE -->
-
-<div
-  class="page"
-  id="page-scan"
->
-
-  <div class="card">
-
-    <h1>Student Check-In</h1>
-
-    <div id="formState">
-
-      <input
-        id="idInput"
-        type="text"
-        placeholder="Enter Student ID"
-      />
-
-      <button
-        class="submit"
-        onclick="submitID()"
-      >
-        Check In
-      </button>
-
-      <div
-        class="error"
-        id="errorMsg"
-      ></div>
-
-    </div>
-
-    <div
-      class="success"
-      id="successState"
-      style="display:none;"
-    >
-      Attendance Recorded
-      <br><br>
-      ID:
-      <span id="successID"></span>
-    </div>
-
-    <div
-      class="error"
-      id="expiredState"
-      style="display:none;"
-    >
-      QR Expired. Scan Again.
-    </div>
-
-  </div>
+  <div id="deviceContainer"></div>
 
 </div>
 
 <script>
 
-const API =
-'https://qr-attendance-backend-production-0d3b.up.railway.app';
-
-const TICK = 35;
-
-let timeLeft = TICK;
-
 // ============================================
-// DEVICE STORAGE
+// DEVICE PANEL
 // ============================================
 
-const DB = {
-
-  getDeviceId(){
-
-    let id =
-      localStorage.getItem('qr_device_id');
-
-    if(!id){
-
-      id =
-        'dev_' +
-        Math.random()
-          .toString(36)
-          .slice(2,10);
-
-      localStorage.setItem(
-        'qr_device_id',
-        id
-      );
-
-    }
-
-    return id;
-
-  }
-
-};
-
-// ============================================
-// BUILD QR
-// ============================================
-
-function buildQR(url){
-
-  const qr =
-    document.getElementById('qrcode');
-
-  qr.innerHTML = '';
-
-  new QRCode(qr, {
-
-    text:url,
-
-    width:200,
-    height:200,
-
-    colorDark:"#000000",
-    colorLight:"#ffffff",
-
-    correctLevel:
-      QRCode.CorrectLevel.H
-
-  });
-
-}
-
-// ============================================
-// FORCE RESET
-// ============================================
-
-async function forceResetToken(){
-
-  try{
-
-    await fetch(
-      `${API}/api/reset-token`,
-      {
-        method:'POST'
-      }
-    );
-
-    await fetchToken();
-
-    alert('QR Reset Complete');
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================================
-// FETCH TOKEN
-// ============================================
-
-async function fetchToken(){
-
-  try{
-
-    const res =
-      await fetch(`${API}/api/token`);
-
-    const data =
-      await res.json();
-
-    buildQR(data.url);
-
-    document.getElementById(
-      'tokenSpan'
-    ).textContent = data.token;
-
-    timeLeft =
-      Math.floor(
-        (data.expires - Date.now()) / 1000
-      );
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================================
-// TIMER
-// ============================================
-
-function updateTimer(){
-
-  timeLeft--;
-
-  const fill =
-    document.getElementById(
-      'timerFill'
-    );
-
-  const percent =
-    (timeLeft / TICK) * 100;
-
-  fill.style.width =
-    percent + '%';
-
-  // GREEN
-
-  if(percent > 60){
-
-    fill.style.background =
-      '#22c55e';
-
-  }
-
-  // YELLOW
-
-  else if(percent > 25){
-
-    fill.style.background =
-      '#eab308';
-
-  }
-
-  // RED
-
-  else{
-
-    fill.style.background =
-      '#ef4444';
-
-  }
-
-  // SHAKE
-
-  if(timeLeft <= 5){
-
-    fill.classList.add('qrShake');
-
-    setTimeout(()=>{
-
-      fill.classList.remove(
-        'qrShake'
-      );
-
-    },350);
-
-  }
-
-  // RESET
-
-  if(timeLeft <= 0){
-
-    const qr =
-      document.getElementById(
-        'qrcode'
-      );
-
-    qr.classList.remove(
-      'qrFadeIn'
-    );
-
-    qr.classList.add(
-      'qrFadeOut'
-    );
-
-    setTimeout(async ()=>{
-
-      await fetchToken();
-
-      qr.classList.remove(
-        'qrFadeOut'
-      );
-
-      qr.classList.add(
-        'qrFadeIn'
-      );
-
-    },350);
-
-  }
-
-}
-
-// ============================================
-// RENDER LOG
-// ============================================
-
-async function renderLog(){
-
-  try{
-
-    const res =
-      await fetch(`${API}/api/log`);
-
-    const log =
-      await res.json();
-
-    const container =
-      document.getElementById(
-        'logContainer'
-      );
-
-    if(!log.length){
-
-      container.innerHTML =
-        '<p>No attendance yet.</p>';
-
-      return;
-
-    }
-
-    container.innerHTML = `
-
-      <table>
-
-        <thead>
-
-          <tr>
-            <th>#</th>
-            <th>User</th>
-            <th>Device</th>
-            <th>Time</th>
-            <th>Type</th>
-          </tr>
-
-        </thead>
-
-        <tbody>
-
-          ${log.map((e,i)=>`
-
-            <tr>
-
-              <td>${i+1}</td>
-
-              <td>${e.userid}</td>
-
-              <td>${e.deviceid}</td>
-
-              <td>${e.fulltime}</td>
-
-              <td>${e.type}</td>
-
-            </tr>
-
-          `).join('')}
-
-        </tbody>
-
-      </table>
-
-    `;
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================================
-// INIT SCAN PAGE
-// ============================================
-
-async function initScanPage(token){
-
-  const deviceId =
-    DB.getDeviceId();
-
-  try{
-
-    const res =
-      await fetch(
-        `${API}/api/checkin`,
-        {
-
-          method:'POST',
-
-          headers:{
-            'Content-Type':
-              'application/json'
-          },
-
-          body:JSON.stringify({
-
-            token,
-            deviceId
-
-          })
-
-        }
-      );
-
-    const data =
-      await res.json();
-
-    if(
-      !data.ok &&
-      data.reason === 'expired'
-    ){
-
-      document.getElementById(
-        'formState'
-      ).style.display = 'none';
-
-      document.getElementById(
-        'expiredState'
-      ).style.display = 'block';
-
-      return;
-
-    }
-
-    if(
-      !data.ok &&
-      data.reason === 'need_id'
-    ){
-
-      return;
-
-    }
-
-    if(data.ok){
-
-      showSuccess(data.userId);
-
-      renderLog();
-
-    }
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================================
-// SUBMIT ID
-// ============================================
-
-async function submitID(){
-
-  const userId =
-    document.getElementById(
-      'idInput'
-    )
-    .value
-    .trim();
-
-  const token =
-    new URLSearchParams(
-      location.search
-    ).get('t');
-
-  if(!userId){
-
-    document.getElementById(
-      'errorMsg'
-    ).textContent =
-      'Enter valid ID';
-
-    return;
-
-  }
-
-  const deviceId =
-    DB.getDeviceId();
-
-  try{
-
-    const res =
-      await fetch(
-        `${API}/api/checkin`,
-        {
-
-          method:'POST',
-
-          headers:{
-            'Content-Type':
-              'application/json'
-          },
-
-          body:JSON.stringify({
-
-            token,
-            deviceId,
-            userId
-
-          })
-
-        }
-      );
-
-    const data =
-      await res.json();
-
-    if(!data.ok){
-
-      // COOLDOWN
-
-      if(data.reason === 'cooldown'){
-
-        document.getElementById(
-          'errorMsg'
-        ).textContent =
-          'Scan limit reached. Try again later.';
-
-        return;
-
-      }
-
-      // BLOCKED
-
-      if(data.reason === 'blocked'){
-
-        document.getElementById(
-          'errorMsg'
-        ).textContent =
-          'This device is blocked';
-
-        return;
-
-      }
-
-      // USER USED
-
-      if(data.reason === 'user_taken'){
-
-        document.getElementById(
-          'errorMsg'
-        ).textContent =
-          'Student ID already linked to another device';
-
-        return;
-
-      }
-
-      // ALREADY SCANNED
-
-      if(data.reason === 'already_scanned'){
-
-        document.getElementById(
-          'errorMsg'
-        ).textContent =
-          'Attendance already recorded';
-
-        return;
-
-      }
-
-      // EXPIRED
-
-      if(data.reason === 'expired'){
-
-        document.getElementById(
-          'errorMsg'
-        ).textContent =
-          'QR Expired';
-
-        return;
-
-      }
-
-      document.getElementById(
-        'errorMsg'
-      ).textContent =
-        'Check-in failed';
-
-      return;
-
-    }
-
-    showSuccess(data.userId);
-
-    renderLog();
-
-  }catch(err){
-
-    console.error(err);
-
-  }
-
-}
-
-// ============================================
-// SUCCESS
-// ============================================
-
-function showSuccess(userId){
-
-  document.getElementById(
-    'formState'
-  ).style.display = 'none';
-
-  document.getElementById(
-    'successState'
-  ).style.display = 'block';
-
-  document.getElementById(
-    'successID'
-  ).textContent = userId;
-
-}
-
-// ============================================
-// EXPORT CSV
-// ============================================
-
-async function exportCSV(){
+async function renderDevices(){
 
   const res =
-    await fetch(`${API}/api/log`);
+    await fetch(`${API}/api/devices`);
 
-  const log =
+  const devices =
     await res.json();
 
-  if(!log.length){
+  const container =
+    document.getElementById(
+      'deviceContainer'
+    );
 
-    alert('No data');
+  if(!devices.length){
+
+    container.innerHTML =
+      '<p>No devices yet.</p>';
 
     return;
 
   }
 
-  const rows = [
+  container.innerHTML = `
 
-    [
-      '#',
-      'User',
-      'Device',
-      'Time',
-      'Type'
-    ],
+    <table>
 
-    ...log.map((e,i)=>[
-      i+1,
-      e.userid,
-      e.deviceid,
-      e.fulltime,
-      e.type
-    ])
+      <thead>
 
-  ];
+        <tr>
 
-  const csv =
-    rows
-      .map(r=>r.join(','))
-      .join('\n');
+          <th>User</th>
+          <th>Device</th>
+          <th>Scans</th>
+          <th>Max</th>
+          <th>Blocked</th>
+          <th>Cooldown</th>
+          <th>Actions</th>
 
-  const blob =
-    new Blob(
-      [csv],
-      { type:'text/csv' }
-    );
+        </tr>
 
-  const a =
-    document.createElement('a');
+      </thead>
 
-  a.href =
-    URL.createObjectURL(blob);
+      <tbody>
 
-  a.download =
-    'attendance.csv';
+        ${devices.map(d => `
 
-  a.click();
+          <tr>
+
+            <td>${d.userid}</td>
+
+            <td>${d.deviceid}</td>
+
+            <td>${d.scan_count}</td>
+
+            <td>${d.max_scans}</td>
+
+            <td>
+              ${d.is_blocked ? 'YES' : 'NO'}
+            </td>
+
+            <td>
+              ${d.cooldown_until || '-'}
+            </td>
+
+            <td>
+
+              <button
+                onclick="blockDevice('${d.deviceid}')"
+              >
+                Block
+              </button>
+
+              <button
+                onclick="unblockDevice('${d.deviceid}')"
+              >
+                Unblock
+              </button>
+
+              <button
+                onclick="bonusScan('${d.deviceid}')"
+              >
+                Bonus
+              </button>
+
+              <button
+                onclick="resetCooldown('${d.deviceid}')"
+              >
+                Reset
+              </button>
+
+            </td>
+
+          </tr>
+
+        `).join('')}
+
+      </tbody>
+
+    </table>
+
+  `;
 
 }
 
 // ============================================
-// CLEAR
+// ACTIONS
 // ============================================
 
-function clearLog(){
+async function blockDevice(deviceId){
 
-  alert(
-    'Clear directly from Supabase.'
+  await fetch(
+    `${API}/api/block-device`,
+    {
+      method:'POST',
+
+      headers:{
+        'Content-Type':'application/json'
+      },
+
+      body:JSON.stringify({
+        deviceId
+      })
+    }
   );
 
-}
-
-// ============================================
-// NAVIGATION
-// ============================================
-
-function showPage(id){
-
-  document
-    .querySelectorAll('.page')
-    .forEach(p =>
-      p.classList.remove('active')
-    );
-
-  document
-    .querySelectorAll('nav button')
-    .forEach(b =>
-      b.classList.remove('active')
-    );
-
-  document
-    .getElementById('page-' + id)
-    .classList.add('active');
+  renderDevices();
 
 }
 
-// ============================================
-// BOOT
-// ============================================
+async function unblockDevice(deviceId){
 
-window.onload = async ()=>{
+  await fetch(
+    `${API}/api/unblock-device`,
+    {
+      method:'POST',
 
-  const params =
-    new URLSearchParams(
-      location.search
-    );
+      headers:{
+        'Content-Type':'application/json'
+      },
 
-  const isAdmin =
-    params.get('admin') === 'mocha123';
+      body:JSON.stringify({
+        deviceId
+      })
+    }
+  );
 
-  // HIDE ADMIN
+  renderDevices();
 
-  if(!isAdmin){
+}
 
-    document.querySelector('nav')
-      .style.display = 'none';
+async function resetCooldown(deviceId){
 
-    document.getElementById(
-      'page-admin'
-    ).style.display = 'none';
+  await fetch(
+    `${API}/api/reset-cooldown`,
+    {
+      method:'POST',
 
-  }
+      headers:{
+        'Content-Type':'application/json'
+      },
 
-  // ADMIN MODE
+      body:JSON.stringify({
+        deviceId
+      })
+    }
+  );
 
-  if(isAdmin){
+  renderDevices();
 
-    await fetchToken();
+}
 
-    renderLog();
+async function bonusScan(deviceId){
 
-    setInterval(fetchToken,5000);
+  const scans =
+    prompt('Set max scans');
 
-    setInterval(renderLog,10000);
+  if(!scans) return;
 
-    setInterval(updateTimer,1000);
+  await fetch(
+    `${API}/api/set-max-scans`,
+    {
+      method:'POST',
 
-  }
+      headers:{
+        'Content-Type':'application/json'
+      },
 
-  // SCAN MODE
+      body:JSON.stringify({
 
-  if(params.get('scan') === '1'){
+        deviceId,
 
-    document
-      .querySelectorAll('.page')
-      .forEach(p =>
-        p.classList.remove('active')
-      );
+        maxScans:Number(scans)
 
-    document
-      .getElementById('page-scan')
-      .classList.add('active');
+      })
+    }
+  );
 
-    initScanPage(
-      params.get('t')
-    );
+  renderDevices();
 
-  }
-
-};
+}
 
 </script>
-
-</body>
-</html>
