@@ -777,6 +777,27 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 .success-id { font-family:var(--mono); font-size:28px; font-weight:700; color:var(--text); margin-bottom:6px; }
 .success-type { font-size:13px; color:var(--text-dim); }
 
+.success-countdown {
+  margin-top: 22px;
+}
+
+.countdown-track {
+  width: 100%; height: 4px;
+  background: var(--subtle); border-radius: 99px; overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.countdown-fill {
+  height: 100%; width: 100%; border-radius: 99px;
+  background: #4ade80;
+  transition: width 1s linear;
+}
+
+.countdown-text {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--muted); letter-spacing: .08em;
+}
+
 .scan-expired { display:none; text-align:center; padding:20px 0; }
 .expired-icon { font-size:36px; margin-bottom:12px; }
 .expired-label { font-family:var(--mono); font-size:12px; color:var(--danger); letter-spacing:.06em; line-height:1.7; }
@@ -1002,6 +1023,10 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
         <div class="success-label">Attendance Recorded</div>
         <div class="success-id" id="successID">—</div>
         <div class="success-type" id="successType"></div>
+        <div class="success-countdown">
+          <div class="countdown-track"><div class="countdown-fill" id="countdownFill"></div></div>
+          <div class="countdown-text">Closing in <span id="countdownNum">5</span>s</div>
+        </div>
       </div>
 
       <div class="scan-expired" id="expiredState">
@@ -1441,6 +1466,40 @@ function showSuccess(userId, type) {
   document.getElementById('successType').textContent    =
     type === 'returning' ? '↩ Welcome back!' : '● First check-in today';
   document.getElementById('successState').style.display = 'block';
+
+  // 5-second countdown then close the tab
+  const TOTAL = 5;
+  let remaining = TOTAL;
+  const numEl  = document.getElementById('countdownNum');
+  const fillEl = document.getElementById('countdownFill');
+
+  // kick the bar to starting width instantly (no transition on first frame)
+  fillEl.style.transition = 'none';
+  fillEl.style.width = '100%';
+
+  // one tick later, start the smooth drain
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      fillEl.style.transition = 'width 1s linear';
+      fillEl.style.width = ((TOTAL - 1) / TOTAL * 100) + '%';
+    });
+  });
+
+  const iv = setInterval(() => {
+    remaining--;
+    numEl.textContent = remaining;
+    fillEl.style.width = (remaining / TOTAL * 100) + '%';
+    if (remaining <= 0) {
+      clearInterval(iv);
+      // Try to close; if the tab wasn't opened by a script,
+      // fall back to a thankyou message so it doesn't just hang.
+      window.close();
+      setTimeout(() => {
+        document.getElementById('countdownNum').closest('.success-countdown').innerHTML =
+          '<div class="countdown-text" style="color:var(--text-dim)">You may close this tab.</div>';
+      }, 400);
+    }
+  }, 1000);
 }
 
 function showExpired() {
