@@ -3,50 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>QR Attendance</title>
+<title>MSA · MIS Attendance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 
 /* ============================================
-  RESET & ROOT
+   RESET & TOKENS
 ============================================ */
 
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-  --bg:        #080c12;
-  --surface:   #0d1117;
-  --panel:     #111820;
-  --border:    #1c2535;
-  --border-hi: #2a3a52;
+  /* MSA palette — deep navy + gold */
+  --bg:          #05080f;
+  --surface:     #090d18;
+  --panel:       #0d1422;
+  --panel-hi:    #111a2e;
+  --border:      #1a2540;
+  --border-hi:   #243356;
 
-  --accent:    #00e5a0;
-  --accent-dim:#00b87f;
-  --accent-glow: rgba(0,229,160,.15);
+  --gold:        #c9a84c;
+  --gold-light:  #e8c97a;
+  --gold-dim:    #8a6d2a;
+  --gold-glow:   rgba(201,168,76,.18);
+  --gold-glow2:  rgba(201,168,76,.06);
 
-  --warn:      #f59e0b;
-  --danger:    #f43f5e;
-  --info:      #3b82f6;
+  --navy:        #0a1628;
+  --navy-hi:     #0f2040;
 
-  --text:      #e8f0fe;
-  --muted:     #5a7090;
-  --subtle:    #2a3a52;
+  --success:     #22c55e;
+  --warn:        #f59e0b;
+  --danger:      #f43f5e;
 
-  --mono: 'Space Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
+  --text:        #dde6f5;
+  --text-dim:    #8ba0c0;
+  --muted:       #3d5070;
+  --subtle:      #1a2540;
 
-  --radius-sm: 8px;
-  --radius:    14px;
-  --radius-lg: 22px;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Outfit', sans-serif;
+
+  --r-sm: 8px;
+  --r:    14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
 }
 
-html { font-size: 14px; }
+html { font-size:14px; }
 
 body {
   background: var(--bg);
@@ -56,121 +61,127 @@ body {
   overflow-x: hidden;
 }
 
-/* ============================================
-  SCROLLBAR
-============================================ */
-
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width:4px; height:4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--subtle); border-radius: 99px; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius:99px; }
 
 /* ============================================
-  GRID BG
+   BACKGROUND — subtle dot grid + radial glow
 ============================================ */
 
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: .3;
-  pointer-events: none;
-  z-index: 0;
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 0%, rgba(201,168,76,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 100%, rgba(10,22,40,.9) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events:none; z-index:0;
 }
 
 /* ============================================
-  NAV
+   NAV
 ============================================ */
 
 nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: rgba(8,12,18,.85);
-  backdrop-filter: blur(12px);
+  position:sticky; top:0; z-index:200;
+  display:flex; align-items:center; gap:10px;
+  padding:0 28px;
+  height:58px;
+  background: rgba(5,8,15,.92);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
 }
 
-.nav-logo {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--accent);
-  letter-spacing: .05em;
-  margin-right: auto;
+.nav-brand {
+  display:flex; align-items:center; gap:12px;
+  margin-right:auto;
 }
 
-.nav-logo span {
-  color: var(--muted);
+.nav-emblem {
+  width:34px; height:34px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; font-weight:800; color:#05080f;
+  font-family: var(--sans);
+  flex-shrink:0;
+  box-shadow: 0 2px 12px var(--gold-glow);
+}
+
+.nav-titles { display:flex; flex-direction:column; gap:1px; }
+
+.nav-title {
+  font-size:13px; font-weight:700;
+  color: var(--text);
+  letter-spacing:.01em;
+  line-height:1;
+}
+
+.nav-sub {
+  font-size:10px; font-weight:400;
+  color: var(--text-dim);
+  letter-spacing:.04em;
+  line-height:1;
 }
 
 nav button {
   border: 1px solid var(--border);
-  padding: 8px 18px;
-  border-radius: var(--radius-sm);
+  padding: 7px 16px;
+  border-radius: var(--r-sm);
   background: transparent;
-  color: var(--muted);
+  color: var(--text-dim);
   cursor: pointer;
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .08em;
+  font-size: 10px;
+  letter-spacing: .1em;
   text-transform: uppercase;
   transition: all .2s;
+  font-weight:500;
 }
 
-nav button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+nav button:hover { border-color:var(--gold); color:var(--gold); }
 
 nav button.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  border-color: var(--gold);
+  color: #05080f;
   font-weight: 700;
 }
 
 /* ============================================
-  PAGES
+   PAGES
 ============================================ */
 
-.page {
-  display: none;
-  position: relative;
-  z-index: 1;
-}
-
-.page.active { display: block; }
+.page { display:none; position:relative; z-index:1; }
+.page.active { display:block; }
 
 /* ============================================
-  ADMIN LAYOUT
+   ADMIN LAYOUT
 ============================================ */
 
 .admin-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 0;
-  min-height: calc(100vh - 53px);
+  display:grid;
+  grid-template-columns: 300px 1fr;
+  min-height: calc(100vh - 58px);
 }
 
-/* ----- LEFT SIDEBAR ----- */
+/* ===== SIDEBAR ===== */
 
 .sidebar {
-  padding: 28px 20px;
+  padding: 22px 18px;
   border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  position: sticky;
-  top: 53px;
-  height: calc(100vh - 53px);
-  overflow-y: auto;
+  display:flex; flex-direction:column; gap:16px;
+  position:sticky; top:58px;
+  height:calc(100vh - 58px);
+  overflow-y:auto;
 }
 
 /* QR CARD */
@@ -178,657 +189,489 @@ nav button.active {
 .qr-card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  text-align: center;
+  border-radius: var(--r-xl);
+  padding: 20px 18px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
 }
 
-.qr-card h2 {
+.qr-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.qr-card-label {
   font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 20px;
+  font-size:9px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--text-dim);
+  margin-bottom:14px;
+}
+
+/* QR WRAPPER — clickable */
+#qrWrapper {
+  width:192px; height:192px;
+  margin:0 auto 16px;
+  position:relative; cursor:pointer;
 }
 
 #qrcode {
-  width: 200px;
-  height: 200px;
-  margin: 0 auto 20px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 40px var(--accent-glow);
+  width:192px; height:192px;
+  border-radius:var(--r);
+  overflow:hidden; background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 0 32px var(--gold-glow), 0 0 0 1px rgba(201,168,76,.15);
+  transition: transform .2s, box-shadow .2s;
 }
 
-#qrcode img, #qrcode canvas {
-  display: block;
+#qrcode:hover {
+  transform:scale(1.03);
+  box-shadow: 0 0 48px rgba(201,168,76,.3), 0 0 0 1px rgba(201,168,76,.3);
+}
+
+#qrcode img, #qrcode canvas { display:block; }
+
+.qr-expand-hint {
+  position:absolute; bottom:6px; right:6px;
+  background:rgba(5,8,15,.75);
+  border:1px solid var(--border-hi);
+  border-radius:5px;
+  padding:3px 6px;
+  font-family:var(--mono);
+  font-size:9px; color:var(--text-dim);
+  pointer-events:none;
+  opacity:.8;
 }
 
 /* TIMER */
 
-.timer-section { width: 100%; }
-
-.timer-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
+.timer-header { display:flex; justify-content:space-between; margin-bottom:6px; }
 
 .timer-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--muted);
+  font-family:var(--mono); font-size:9px;
+  text-transform:uppercase; letter-spacing:.1em; color:var(--muted);
 }
 
-#timerCount {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--accent);
-}
+#timerCount { font-family:var(--mono); font-size:9px; color:var(--gold); }
 
 .timer-track {
-  width: 100%;
-  height: 6px;
-  background: var(--subtle);
-  border-radius: 99px;
-  overflow: hidden;
+  width:100%; height:5px;
+  background:var(--subtle); border-radius:99px; overflow:hidden;
 }
 
 #timerFill {
-  height: 100%;
-  width: 100%;
-  border-radius: 99px;
-  background: var(--accent);
+  height:100%; width:100%; border-radius:99px;
+  background:var(--gold);
   transition: width 1s linear, background .4s ease;
 }
 
-/* TOKEN DISPLAY */
+/* TOKEN */
 
-.token-display {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px;
-  margin-top: 14px;
+.token-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:9px 11px; margin-top:12px; text-align:left;
 }
 
-.token-display .tl {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  margin-bottom: 4px;
+.token-box .tl {
+  font-family:var(--mono); font-size:8px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); margin-bottom:3px;
 }
 
 #tokenSpan {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--accent);
-  word-break: break-all;
-  line-height: 1.5;
+  font-family:var(--mono); font-size:9px;
+  color:var(--gold); word-break:break-all; line-height:1.6;
 }
 
-/* SIDEBAR STATS */
+/* STATS */
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
 .stat-box {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  text-align: center;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--r); padding:12px; text-align:center;
 }
 
 .stat-box .sv {
-  font-family: var(--mono);
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--accent);
-  line-height: 1;
+  font-family:var(--mono); font-size:24px; font-weight:700;
+  color:var(--gold); line-height:1;
 }
 
 .stat-box .sk {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: .08em;
+  font-size:10px; color:var(--muted); margin-top:3px;
+  text-transform:uppercase; letter-spacing:.08em;
 }
 
 /* SIDEBAR BUTTONS */
 
-.sidebar-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.sidebar-actions { display:flex; flex-direction:column; gap:7px; }
 
 .btn {
-  border: none;
-  padding: 11px 16px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  transition: all .18s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
+  border:none; padding:10px 14px; border-radius:var(--r-sm);
+  cursor:pointer; font-family:var(--mono); font-size:10px;
+  font-weight:600; letter-spacing:.09em; text-transform:uppercase;
+  transition:all .18s;
+  display:flex; align-items:center; justify-content:center; gap:6px;
 }
 
-.btn-primary {
-  background: var(--accent);
-  color: #000;
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  color:#05080f;
 }
 
-.btn-primary:hover {
-  background: #00ffb5;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px var(--accent-glow);
-}
+.btn-gold:hover { filter:brightness(1.1); transform:translateY(-1px); box-shadow:0 4px 16px var(--gold-glow); }
 
 .btn-ghost {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
+  background:transparent; border:1px solid var(--border); color:var(--text-dim);
 }
 
-.btn-ghost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+.btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
 
-.btn-danger {
-  background: transparent;
-  border: 1px solid var(--danger);
-  color: var(--danger);
-}
-
-.btn-danger:hover {
-  background: var(--danger);
-  color: white;
-}
+.btn-danger { background:transparent; border:1px solid rgba(244,63,94,.3); color:var(--danger); }
+.btn-danger:hover { background:rgba(244,63,94,.08); }
 
 /* ============================================
-  MAIN CONTENT
+   MAIN CONTENT
 ============================================ */
 
-.main-content {
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-/* SECTION HEADERS */
+.main-content { padding:24px; display:flex; flex-direction:column; gap:24px; }
 
 .section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px; padding-bottom:10px;
+  border-bottom:1px solid var(--border);
 }
 
 .section-title {
-  font-family: var(--mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--muted);
+  font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:.14em; color:var(--text-dim);
 }
 
 .section-count {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--accent);
-  background: var(--accent-glow);
-  border: 1px solid rgba(0,229,160,.2);
-  padding: 3px 10px;
-  border-radius: 99px;
+  font-family:var(--mono); font-size:10px; color:var(--gold);
+  background:var(--gold-glow2); border:1px solid rgba(201,168,76,.15);
+  padding:3px 10px; border-radius:99px;
 }
 
 /* ============================================
-  TABLES
+   TABLES
 ============================================ */
 
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x:auto; }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 580px;
-}
+table { width:100%; border-collapse:collapse; min-width:560px; }
 
 th {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--muted);
-  text-align: left;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
+  font-family:var(--mono); font-size:9px; text-transform:uppercase;
+  letter-spacing:.12em; color:var(--muted); text-align:left;
+  padding:9px 12px; border-bottom:1px solid var(--border);
 }
 
-td {
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-  color: var(--text);
-}
+td { padding:11px 12px; border-bottom:1px solid var(--border); font-size:13px; }
 
-tr:last-child td { border-bottom: none; }
+tr:last-child td { border-bottom:none; }
+tbody tr { transition:background .12s; }
+tbody tr:hover { background:rgba(201,168,76,.03); }
 
-tbody tr {
-  transition: background .15s;
-}
+.mono-cell { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
 
-tbody tr:hover { background: rgba(255,255,255,.02); }
-
-.mono-cell {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--muted);
-}
+/* BADGES */
 
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border-radius: 99px;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 9px; border-radius:99px;
+  font-family:var(--mono); font-size:9px; font-weight:600;
+  letter-spacing:.06em; text-transform:uppercase;
 }
 
-.badge-new {
-  background: rgba(0,229,160,.1);
-  color: var(--accent);
-  border: 1px solid rgba(0,229,160,.2);
-}
-
-.badge-returning {
-  background: rgba(59,130,246,.1);
-  color: #60a5fa;
-  border: 1px solid rgba(59,130,246,.2);
-}
-
-.badge-active {
-  background: rgba(0,229,160,.1);
-  color: var(--accent);
-  border: 1px solid rgba(0,229,160,.2);
-}
-
-.badge-blocked {
-  background: rgba(244,63,94,.1);
-  color: var(--danger);
-  border: 1px solid rgba(244,63,94,.25);
-}
-
-.badge-cooldown {
-  background: rgba(245,158,11,.1);
-  color: var(--warn);
-  border: 1px solid rgba(245,158,11,.2);
-}
-
-/* ACTION BUTTONS IN TABLE */
-
-.action-row {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.act-btn {
-  border: none;
-  padding: 5px 11px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  transition: all .15s;
-}
-
-.act-btn:hover { opacity: .85; transform: translateY(-1px); }
-.act-btn:active { transform: translateY(0); }
-
-.act-block   { background: rgba(244,63,94,.15);  color: var(--danger); border: 1px solid rgba(244,63,94,.3); }
-.act-unblock { background: rgba(0,229,160,.12);  color: var(--accent); border: 1px solid rgba(0,229,160,.3); }
-.act-bonus   { background: rgba(59,130,246,.12); color: #60a5fa;       border: 1px solid rgba(59,130,246,.3); }
-.act-reset   { background: rgba(245,158,11,.12); color: var(--warn);   border: 1px solid rgba(245,158,11,.3); }
+.badge-new      { background:rgba(34,197,94,.08);  color:#4ade80; border:1px solid rgba(34,197,94,.2); }
+.badge-returning{ background:rgba(59,130,246,.08); color:#60a5fa; border:1px solid rgba(59,130,246,.2); }
+.badge-active   { background:rgba(34,197,94,.08);  color:#4ade80; border:1px solid rgba(34,197,94,.2); }
+.badge-blocked  { background:rgba(244,63,94,.08);  color:var(--danger); border:1px solid rgba(244,63,94,.2); }
+.badge-cooldown { background:rgba(245,158,11,.08); color:var(--warn); border:1px solid rgba(245,158,11,.2); }
 
 /* SCAN BAR */
 
-.scan-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.scan-bar-wrap { display:flex; align-items:center; gap:8px; }
+.scan-bar-track { flex:1; height:4px; background:var(--subtle); border-radius:99px; overflow:hidden; }
+.scan-bar-fill  { height:100%; background:var(--gold); border-radius:99px; }
+.scan-label     { font-family:var(--mono); font-size:10px; color:var(--text-dim); min-width:30px; text-align:right; }
 
-.scan-bar-track {
-  flex: 1;
-  height: 4px;
-  background: var(--subtle);
-  border-radius: 99px;
-  overflow: hidden;
+/* ACTION BUTTONS */
+
+.action-row { display:flex; gap:5px; flex-wrap:wrap; }
+
+.act-btn {
+  border:none; padding:4px 10px; border-radius:5px;
+  cursor:pointer; font-family:var(--mono); font-size:9px;
+  font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  transition:all .14s;
 }
 
-.scan-bar-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 99px;
-  transition: width .3s;
-}
+.act-btn:hover { opacity:.8; transform:translateY(-1px); }
 
-.scan-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  min-width: 32px;
-  text-align: right;
-}
-
-/* EMPTY STATE */
+.act-block   { background:rgba(244,63,94,.12);  color:var(--danger); border:1px solid rgba(244,63,94,.25); }
+.act-unblock { background:rgba(34,197,94,.1);   color:#4ade80;       border:1px solid rgba(34,197,94,.2); }
+.act-bonus   { background:rgba(201,168,76,.1);  color:var(--gold);   border:1px solid rgba(201,168,76,.2); }
+.act-reset   { background:rgba(245,158,11,.1);  color:var(--warn);   border:1px solid rgba(245,158,11,.2); }
 
 .empty-state {
-  padding: 40px;
-  text-align: center;
-  color: var(--muted);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .08em;
+  padding:36px; text-align:center; color:var(--muted);
+  font-family:var(--mono); font-size:11px; letter-spacing:.08em;
 }
 
 /* ============================================
-  TOAST
+   QR LIGHTBOX
+============================================ */
+
+#qrLightbox {
+  position:fixed; inset:0; z-index:999;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; pointer-events:none;
+  transition:opacity .3s ease;
+}
+
+#qrLightbox.open { opacity:1; pointer-events:all; }
+
+.lb-backdrop {
+  position:absolute; inset:0;
+  background:rgba(5,8,15,.92);
+  backdrop-filter:blur(16px);
+  cursor:pointer;
+}
+
+.lb-body {
+  position:relative; z-index:1;
+  background:var(--panel);
+  border:1px solid var(--border-hi);
+  border-radius:var(--r-xl);
+  padding:36px 40px;
+  text-align:center;
+  box-shadow: 0 0 80px rgba(201,168,76,.15), 0 32px 80px rgba(0,0,0,.6);
+  transform:scale(.88);
+  transition:transform .32s cubic-bezier(.34,1.56,.64,1);
+}
+
+#qrLightbox.open .lb-body { transform:scale(1); }
+
+.lb-header { margin-bottom:20px; }
+
+.lb-school {
+  font-size:11px; font-weight:600; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:4px;
+}
+
+.lb-course {
+  font-size:13px; font-weight:500; color:var(--text-dim);
+}
+
+#qrLarge {
+  width:320px; height:320px;
+  border-radius:var(--r-lg); overflow:hidden; background:#fff;
+  margin:0 auto;
+  box-shadow: 0 0 60px rgba(201,168,76,.25);
+}
+
+#qrLarge img, #qrLarge canvas { display:block; }
+
+.lb-footer { margin-top:20px; }
+
+.lb-timer-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+
+.lb-timer-track {
+  flex:1; height:6px;
+  background:var(--subtle); border-radius:99px; overflow:hidden;
+}
+
+#lbTimerFill {
+  height:100%; border-radius:99px; background:var(--gold);
+  transition:width 1s linear, background .4s ease;
+}
+
+#lbTimerCount {
+  font-family:var(--mono); font-size:11px; color:var(--gold); min-width:28px;
+}
+
+.lb-hint {
+  font-family:var(--mono); font-size:9px; letter-spacing:.08em;
+  color:var(--muted); text-transform:uppercase;
+}
+
+.lb-close {
+  position:absolute; top:14px; right:16px;
+  background:transparent; border:1px solid var(--border);
+  color:var(--text-dim); border-radius:6px;
+  padding:5px 10px; cursor:pointer;
+  font-family:var(--mono); font-size:9px;
+  letter-spacing:.08em; text-transform:uppercase;
+  transition:all .15s;
+}
+
+.lb-close:hover { border-color:var(--danger); color:var(--danger); }
+
+/* ============================================
+   TOAST
 ============================================ */
 
 #toast {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  pointer-events: none;
+  position:fixed; bottom:22px; right:22px; z-index:9999;
+  display:flex; flex-direction:column; gap:7px; pointer-events:none;
 }
 
 .toast-item {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 18px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
-  animation: toastIn .25s ease;
-  min-width: 220px;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:11px 16px;
+  font-family:var(--mono); font-size:10px; color:var(--text);
+  display:flex; align-items:center; gap:9px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  animation:toastIn .22s ease;
+  min-width:200px;
 }
 
-.toast-item.success { border-color: rgba(0,229,160,.4); }
-.toast-item.error   { border-color: rgba(244,63,94,.4); }
-.toast-item.warn    { border-color: rgba(245,158,11,.4); }
+.toast-item.success { border-color:rgba(34,197,94,.35); }
+.toast-item.error   { border-color:rgba(244,63,94,.35); }
+.toast-item.warn    { border-color:rgba(245,158,11,.35); }
 
-.toast-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.toast-item.success .toast-dot { background: var(--accent); }
-.toast-item.error   .toast-dot { background: var(--danger); }
-.toast-item.warn    .toast-dot { background: var(--warn); }
+.toast-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.toast-item.success .toast-dot { background:#4ade80; }
+.toast-item.error   .toast-dot { background:var(--danger); }
+.toast-item.warn    .toast-dot { background:var(--warn); }
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateX(16px); }
-  to   { opacity: 1; transform: translateX(0); }
+  from { opacity:0; transform:translateX(14px); }
+  to   { opacity:1; transform:translateX(0); }
 }
 
 /* ============================================
-  SCAN PAGE
+   SCAN PAGE
 ============================================ */
 
 .scan-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
 }
 
 .scan-card {
-  width: 100%;
-  max-width: 420px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 40px 36px;
-  text-align: center;
-  position: relative;
-  z-index: 1;
+  width:100%; max-width:400px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:40px 34px;
+  text-align:center;
+  position:relative;
+  box-shadow:0 0 60px rgba(201,168,76,.08), 0 24px 60px rgba(0,0,0,.4);
 }
 
-/* Glow halo behind card */
 .scan-card::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, var(--accent-glow), transparent 60%);
-  z-index: -1;
-  opacity: .5;
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  border-radius:var(--r-xl) var(--r-xl) 0 0;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
 }
 
-.scan-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--accent-glow);
-  border: 1px solid rgba(0,229,160,.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
-  font-size: 26px;
+.scan-logo-wrap { margin-bottom:22px; }
+
+.scan-emblem {
+  width:54px; height:54px;
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  border-radius:14px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:800; color:#05080f;
+  margin-bottom:10px;
+  box-shadow:0 4px 20px var(--gold-glow);
+}
+
+.scan-school {
+  font-size:10px; font-weight:600; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:2px;
+}
+
+.scan-faculty {
+  font-size:11px; color:var(--text-dim); letter-spacing:.02em;
 }
 
 .scan-card h1 {
-  font-family: var(--mono);
-  font-size: 16px;
-  letter-spacing: .06em;
-  color: var(--text);
-  margin-bottom: 6px;
+  font-size:20px; font-weight:700; color:var(--text);
+  letter-spacing:-.01em; margin-bottom:6px;
 }
 
-.scan-card p {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 28px;
-}
+.scan-card p { font-size:13px; color:var(--text-dim); margin-bottom:26px; }
 
 .scan-input {
-  width: 100%;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 14px;
-  letter-spacing: .04em;
-  outline: none;
-  transition: border-color .2s, box-shadow .2s;
-  text-align: center;
+  width:100%; padding:13px 16px;
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--text);
+  font-family:var(--mono); font-size:14px; letter-spacing:.04em;
+  outline:none; transition:border-color .2s, box-shadow .2s; text-align:center;
 }
 
-.scan-input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-glow);
-}
-
-.scan-input::placeholder { color: var(--subtle); }
+.scan-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-glow); }
+.scan-input::placeholder { color:var(--muted); }
 
 .scan-submit {
-  width: 100%;
-  margin-top: 12px;
-  padding: 14px;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: #000;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all .2s;
+  width:100%; margin-top:10px; padding:13px;
+  border:none; border-radius:var(--r-sm);
+  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  color:#05080f; font-family:var(--mono); font-size:11px;
+  font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  cursor:pointer; transition:all .2s;
 }
 
-.scan-submit:hover {
-  background: #00ffb5;
-  box-shadow: 0 4px 20px var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-.scan-submit:active { transform: translateY(0); }
+.scan-submit:hover { filter:brightness(1.1); box-shadow:0 4px 20px var(--gold-glow); transform:translateY(-1px); }
 
 .scan-error {
-  margin-top: 14px;
-  padding: 10px 14px;
-  background: rgba(244,63,94,.08);
-  border: 1px solid rgba(244,63,94,.2);
-  border-radius: var(--radius-sm);
-  color: var(--danger);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .05em;
-  display: none;
+  margin-top:12px; padding:10px 13px;
+  background:rgba(244,63,94,.07); border:1px solid rgba(244,63,94,.2);
+  border-radius:var(--r-sm); color:var(--danger);
+  font-family:var(--mono); font-size:10px; letter-spacing:.04em; display:none;
 }
 
-/* SUCCESS STATE */
+/* SUCCESS */
 
-.scan-success {
-  display: none;
-  animation: successIn .4s cubic-bezier(.34,1.56,.64,1);
-}
+.scan-success { display:none; animation:successIn .38s cubic-bezier(.34,1.56,.64,1); }
 
 @keyframes successIn {
-  from { opacity: 0; transform: scale(.9) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from { opacity:0; transform:scale(.88) translateY(10px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
 }
 
 .success-check {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(0,229,160,.12);
-  border: 2px solid var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 20px;
-  font-size: 32px;
+  width:68px; height:68px; border-radius:50%;
+  background:rgba(34,197,94,.1); border:2px solid #4ade80;
+  display:flex; align-items:center; justify-content:center;
+  margin:0 auto 18px; font-size:28px;
 }
 
 .success-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--accent);
-  margin-bottom: 6px;
+  font-family:var(--mono); font-size:10px; text-transform:uppercase;
+  letter-spacing:.14em; color:#4ade80; margin-bottom:6px;
 }
 
-.success-id {
-  font-family: var(--mono);
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 8px;
-}
+.success-id { font-family:var(--mono); font-size:28px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.success-type { font-size:13px; color:var(--text-dim); }
 
-.success-type {
-  font-size: 13px;
-  color: var(--muted);
-}
+/* EXPIRED */
 
-/* EXPIRED STATE */
+.scan-expired { display:none; text-align:center; padding:20px 0; }
+.expired-icon { font-size:36px; margin-bottom:12px; }
+.expired-label { font-family:var(--mono); font-size:12px; color:var(--danger); letter-spacing:.06em; line-height:1.7; }
 
-.scan-expired {
-  display: none;
-  text-align: center;
-  padding: 20px 0;
-}
+/* QR FADE ANIMATIONS */
 
-.expired-icon {
-  font-size: 40px;
-  margin-bottom: 14px;
-}
+.qrFadeOut { animation:fadeOut .28s ease forwards; }
+.qrFadeIn  { animation:fadeIn  .28s ease forwards; }
 
-.expired-label {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--danger);
-  letter-spacing: .06em;
-}
+@keyframes fadeOut { to { opacity:0; transform:scale(.93); } }
+@keyframes fadeIn  { from { opacity:0; transform:scale(.93); } to { opacity:1; transform:scale(1); } }
 
 /* ============================================
-  ANIMATIONS
+   RESPONSIVE
 ============================================ */
 
-.qrFadeOut { animation: fadeOut .3s ease forwards; }
-.qrFadeIn  { animation: fadeIn  .3s ease forwards; }
-
-@keyframes fadeOut {
-  to { opacity: 0; transform: scale(.94); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(.94); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* ============================================
-  RESPONSIVE
-============================================ */
-
-@media (max-width: 900px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
-  .sidebar {
-    position: static;
-    height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+@media (max-width:860px) {
+  .admin-layout { grid-template-columns:1fr; }
+  .sidebar { position:static; height:auto; border-right:none; border-bottom:1px solid var(--border); }
 }
 
 </style>
@@ -838,18 +681,44 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- QR LIGHTBOX -->
+<div id="qrLightbox">
+  <div class="lb-backdrop" onclick="closeLightbox()"></div>
+  <div class="lb-body">
+    <button class="lb-close" onclick="closeLightbox()">✕ Close</button>
+    <div class="lb-header">
+      <div class="lb-school">MSA University · Faculty of Management Sciences</div>
+      <div class="lb-course">Management Information Systems</div>
+    </div>
+    <div id="qrLarge"></div>
+    <div class="lb-footer">
+      <div class="lb-timer-row">
+        <div class="lb-timer-track"><div id="lbTimerFill"></div></div>
+        <span id="lbTimerCount">35s</span>
+      </div>
+      <div class="lb-hint">Scan with your phone · Refreshes automatically</div>
+    </div>
+  </div>
+</div>
+
 <!-- ============================================
-  NAV
+   NAV
 ============================================ -->
 
 <nav id="mainNav">
-  <div class="nav-logo">QR<span>/</span>ATTENDANCE</div>
+  <div class="nav-brand">
+    <div class="nav-emblem">M</div>
+    <div class="nav-titles">
+      <div class="nav-title">MSA University</div>
+      <div class="nav-sub">MIS · Attendance System</div>
+    </div>
+  </div>
   <button class="active" onclick="showPage('admin')">Admin</button>
   <button onclick="showPage('scan')">Scan</button>
 </nav>
 
 <!-- ============================================
-  ADMIN PAGE
+   ADMIN PAGE
 ============================================ -->
 
 <div class="page active" id="page-admin">
@@ -858,85 +727,58 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
     <!-- SIDEBAR -->
     <aside class="sidebar">
 
-      <!-- QR -->
       <div class="qr-card">
-        <h2>Live QR Code</h2>
-        <div id="qrcode"></div>
+        <div class="qr-card-label">Live Attendance QR</div>
 
-        <div class="timer-section">
-          <div class="timer-header">
-            <span class="timer-label">Expires in</span>
-            <span id="timerCount">35s</span>
-          </div>
-          <div class="timer-track">
-            <div id="timerFill"></div>
-          </div>
+        <div id="qrWrapper" onclick="openLightbox()" title="Click to expand">
+          <div id="qrcode"></div>
+          <div class="qr-expand-hint">⛶ expand</div>
         </div>
 
-        <div class="token-display">
-          <div class="tl">Token</div>
+        <div class="timer-header">
+          <span class="timer-label">Refreshes in</span>
+          <span id="timerCount">35s</span>
+        </div>
+        <div class="timer-track"><div id="timerFill"></div></div>
+
+        <div class="token-box">
+          <div class="tl">Active Token</div>
           <div id="tokenSpan">—</div>
         </div>
       </div>
 
-      <!-- STATS -->
       <div class="stats-grid">
-        <div class="stat-box">
-          <div class="sv" id="statTotal">—</div>
-          <div class="sk">Total</div>
-        </div>
-        <div class="stat-box">
-          <div class="sv" id="statToday">—</div>
-          <div class="sk">Today</div>
-        </div>
-        <div class="stat-box">
-          <div class="sv" id="statDevices">—</div>
-          <div class="sk">Devices</div>
-        </div>
-        <div class="stat-box">
-          <div class="sv" id="statBlocked">—</div>
-          <div class="sk">Blocked</div>
-        </div>
+        <div class="stat-box"><div class="sv" id="statTotal">—</div><div class="sk">Total</div></div>
+        <div class="stat-box"><div class="sv" id="statToday">—</div><div class="sk">Today</div></div>
+        <div class="stat-box"><div class="sv" id="statDevices">—</div><div class="sk">Devices</div></div>
+        <div class="stat-box"><div class="sv" id="statBlocked">—</div><div class="sk">Blocked</div></div>
       </div>
 
-      <!-- ACTIONS -->
       <div class="sidebar-actions">
-        <button class="btn btn-primary" onclick="exportCSV()">
-          ↓ Export CSV
-        </button>
-        <button class="btn btn-ghost" onclick="forceResetToken()">
-          ↺ Force Reset QR
-        </button>
-        <button class="btn btn-danger" onclick="clearLog()">
-          ✕ Clear Log
-        </button>
+        <button class="btn btn-gold"   onclick="exportCSV()">↓ Export CSV</button>
+        <button class="btn btn-ghost"  onclick="forceResetToken()">↺ Force Reset QR</button>
+        <button class="btn btn-danger" onclick="clearLog()">✕ Clear Log</button>
       </div>
 
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN -->
     <main class="main-content">
 
-      <!-- ATTENDANCE LOG -->
       <section>
         <div class="section-header">
           <span class="section-title">Attendance Log</span>
           <span class="section-count" id="logCount">0 records</span>
         </div>
         <div class="table-wrap">
-          <div id="logContainer">
-            <div class="empty-state">Loading records...</div>
-          </div>
+          <div id="logContainer"><div class="empty-state">Loading records...</div></div>
         </div>
       </section>
 
-      <!-- DEVICE MODERATION -->
       <section>
         <div class="section-header">
           <span class="section-title">Device Moderation</span>
-          <button class="btn btn-ghost" style="padding:6px 14px" onclick="renderDevices()">
-            ↺ Refresh
-          </button>
+          <button class="btn btn-ghost" style="padding:5px 12px" onclick="renderDevices()">↺ Refresh</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -962,34 +804,28 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
 </div>
 
 <!-- ============================================
-  SCAN PAGE
+   SCAN PAGE
 ============================================ -->
 
 <div class="page" id="page-scan">
   <div class="scan-page">
     <div class="scan-card">
 
-      <!-- FORM STATE -->
       <div id="formState">
-        <div class="scan-icon">🎓</div>
+        <div class="scan-logo-wrap">
+          <div class="scan-emblem">M</div>
+          <div class="scan-school">MSA University</div>
+          <div class="scan-faculty">Faculty of Management Sciences · MIS</div>
+        </div>
         <h1>Student Check-In</h1>
-        <p>Enter your student ID to record attendance</p>
-        <input
-          class="scan-input"
-          id="idInput"
-          type="text"
-          placeholder="e.g. STU-00123"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-        />
-        <button class="scan-submit" onclick="submitID()">
-          Confirm Attendance
-        </button>
+        <p>Enter your Student ID to record attendance</p>
+        <input class="scan-input" id="idInput" type="text"
+          placeholder="e.g. 20231234"
+          autocomplete="off" autocorrect="off" spellcheck="false"/>
+        <button class="scan-submit" onclick="submitID()">Confirm Attendance</button>
         <div class="scan-error" id="errorMsg"></div>
       </div>
 
-      <!-- SUCCESS STATE -->
       <div class="scan-success" id="successState">
         <div class="success-check">✓</div>
         <div class="success-label">Attendance Recorded</div>
@@ -997,7 +833,6 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
         <div class="success-type" id="successType"></div>
       </div>
 
-      <!-- EXPIRED STATE -->
       <div class="scan-expired" id="expiredState">
         <div class="expired-icon">⏱</div>
         <div class="expired-label">QR Code Expired<br>Please Scan Again</div>
@@ -1008,17 +843,17 @@ tbody tr:hover { background: rgba(255,255,255,.02); }
 </div>
 
 <!-- ============================================
-  SCRIPT
+   SCRIPT
 ============================================ -->
-
 <script>
 
 const API  = 'https://qr-attendance-backend-production-0d3b.up.railway.app';
 const TICK = 35;
-let timeLeft = TICK;
+let timeLeft   = TICK;
+let currentURL = '';
 
 /* ============================================
-  DEVICE ID
+   DEVICE ID
 ============================================ */
 
 function getDeviceId() {
@@ -1031,12 +866,12 @@ function getDeviceId() {
 }
 
 /* ============================================
-  TOAST
+   TOAST
 ============================================ */
 
 function toast(msg, type = 'success') {
   const wrap = document.getElementById('toast');
-  const el = document.createElement('div');
+  const el   = document.createElement('div');
   el.className = `toast-item ${type}`;
   el.innerHTML = `<div class="toast-dot"></div>${msg}`;
   wrap.appendChild(el);
@@ -1044,31 +879,52 @@ function toast(msg, type = 'success') {
 }
 
 /* ============================================
-  QR
+   BUILD QR — both sidebar and lightbox
 ============================================ */
 
 function buildQR(url) {
+  currentURL = url;
+
+  // Sidebar QR
   const el = document.getElementById('qrcode');
   el.innerHTML = '';
-  new QRCode(el, {
-    text: url,
-    width: 192,
-    height: 192,
-    colorDark: '#000000',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.H
-  });
+  new QRCode(el, { text: url, width: 184, height: 184,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H });
+
+  // Lightbox QR (always keep in sync)
+  const lb = document.getElementById('qrLarge');
+  lb.innerHTML = '';
+  new QRCode(lb, { text: url, width: 320, height: 320,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H });
 }
 
 /* ============================================
-  FETCH TOKEN
+   LIGHTBOX
+============================================ */
+
+function openLightbox() {
+  document.getElementById('qrLightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('qrLightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+/* ============================================
+   FETCH TOKEN
 ============================================ */
 
 async function fetchToken() {
   try {
     const res  = await fetch(`${API}/api/token`);
     const data = await res.json();
-
     buildQR(data.url);
     document.getElementById('tokenSpan').textContent = data.token;
     timeLeft = Math.max(1, Math.floor((data.expires - Date.now()) / 1000));
@@ -1078,7 +934,7 @@ async function fetchToken() {
 }
 
 /* ============================================
-  FORCE RESET
+   FORCE RESET
 ============================================ */
 
 async function forceResetToken() {
@@ -1088,23 +944,23 @@ async function forceResetToken() {
 }
 
 /* ============================================
-  TIMER
+   TIMER — updates both sidebar and lightbox bars
 ============================================ */
 
 function updateTimer() {
   timeLeft = Math.max(0, timeLeft - 1);
 
-  const fill    = document.getElementById('timerFill');
-  const counter = document.getElementById('timerCount');
-  const pct     = (timeLeft / TICK) * 100;
+  const pct = (timeLeft / TICK) * 100;
+  const col  = pct > 60 ? 'var(--gold)' : pct > 25 ? 'var(--warn)' : 'var(--danger)';
+  const txt  = timeLeft + 's';
 
-  fill.style.width      = pct + '%';
-  counter.textContent   = timeLeft + 's';
+  document.getElementById('timerFill').style.width      = pct + '%';
+  document.getElementById('timerFill').style.background = col;
+  document.getElementById('timerCount').textContent     = txt;
 
-  fill.style.background =
-    pct > 60 ? 'var(--accent)' :
-    pct > 25 ? 'var(--warn)'   :
-               'var(--danger)';
+  document.getElementById('lbTimerFill').style.width      = pct + '%';
+  document.getElementById('lbTimerFill').style.background = col;
+  document.getElementById('lbTimerCount').textContent     = txt;
 
   if (timeLeft <= 0) {
     const qr = document.getElementById('qrcode');
@@ -1113,13 +969,21 @@ function updateTimer() {
       await fetchToken();
       qr.classList.remove('qrFadeOut');
       qr.classList.add('qrFadeIn');
-      setTimeout(() => qr.classList.remove('qrFadeIn'), 400);
-    }, 320);
+      setTimeout(() => qr.classList.remove('qrFadeIn'), 320);
+    }, 300);
   }
 }
 
 /* ============================================
-  RENDER LOG
+   HELPERS — is_blocked can be bool or string
+============================================ */
+
+function isBlocked(val) {
+  return val === true || val === 'true';
+}
+
+/* ============================================
+   RENDER LOG
 ============================================ */
 
 async function renderLog() {
@@ -1128,10 +992,8 @@ async function renderLog() {
     const log = await res.json();
 
     document.getElementById('statTotal').textContent = log.length;
-
-    const today     = new Date().toLocaleDateString('en-US');
-    const todayRows = log.filter(e => e.date === today);
-    document.getElementById('statToday').textContent = todayRows.length;
+    const today = new Date().toLocaleDateString('en-US');
+    document.getElementById('statToday').textContent = log.filter(e => e.date === today).length;
     document.getElementById('logCount').textContent  = log.length + ' records';
 
     const container = document.getElementById('logContainer');
@@ -1144,13 +1006,7 @@ async function renderLog() {
     container.innerHTML = `
       <table>
         <thead>
-          <tr>
-            <th>#</th>
-            <th>User ID</th>
-            <th>Device</th>
-            <th>Date & Time</th>
-            <th>Type</th>
-          </tr>
+          <tr><th>#</th><th>User ID</th><th>Device</th><th>Date & Time</th><th>Type</th></tr>
         </thead>
         <tbody>
           ${log.map((e, i) => `
@@ -1159,23 +1015,18 @@ async function renderLog() {
               <td>${e.userid}</td>
               <td class="mono-cell">${e.deviceid}</td>
               <td class="mono-cell">${e.fulltime}</td>
-              <td>
-                <span class="badge badge-${e.type}">
-                  ${e.type === 'new' ? '● New' : '↩ Return'}
-                </span>
-              </td>
+              <td><span class="badge badge-${e.type}">${e.type === 'new' ? '● New' : '↩ Return'}</span></td>
             </tr>
           `).join('')}
         </tbody>
-      </table>
-    `;
+      </table>`;
   } catch (err) {
     console.error('[renderLog]', err);
   }
 }
 
 /* ============================================
-  RENDER DEVICES
+   RENDER DEVICES — all visual bugs fixed
 ============================================ */
 
 async function renderDevices() {
@@ -1184,7 +1035,7 @@ async function renderDevices() {
     const devices = await res.json();
 
     document.getElementById('statDevices').textContent = devices.length;
-    document.getElementById('statBlocked').textContent = devices.filter(d => d.is_blocked).length;
+    document.getElementById('statBlocked').textContent = devices.filter(d => isBlocked(d.is_blocked)).length;
 
     const container = document.getElementById('deviceContainer');
 
@@ -1196,22 +1047,25 @@ async function renderDevices() {
     container.innerHTML = devices.map(d => {
       const pct = d.max_scans > 0 ? Math.round((d.scan_count / d.max_scans) * 100) : 0;
 
-      // Determine status badge
+      // FIX: coerce is_blocked from string OR boolean
+      const blocked  = isBlocked(d.is_blocked);
+      const inCool   = !blocked && d.cooldown_until && Date.now() < new Date(d.cooldown_until).getTime();
+
       let statusBadge;
-      if (d.is_blocked) {
-        statusBadge = `<span class="badge badge-blocked">Blocked</span>`;
-      } else if (d.cooldown_until && Date.now() < new Date(d.cooldown_until).getTime()) {
-        statusBadge = `<span class="badge badge-cooldown">Cooldown</span>`;
-      } else {
-        statusBadge = `<span class="badge badge-active">Active</span>`;
+      if (blocked)     statusBadge = `<span class="badge badge-blocked">Blocked</span>`;
+      else if (inCool) statusBadge = `<span class="badge badge-cooldown">Cooldown</span>`;
+      else             statusBadge = `<span class="badge badge-active">Active</span>`;
+
+      // FIX: show cooldown time properly; null → '—'
+      let cooldownStr = '—';
+      if (d.cooldown_until) {
+        const cd = new Date(d.cooldown_until);
+        if (!isNaN(cd.getTime())) {
+          cooldownStr = cd.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
       }
 
-      const cooldownStr = d.cooldown_until
-        ? new Date(d.cooldown_until).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
-        : '—';
-
-      // Escape device ID for safe HTML attribute use
-      const safeId = d.deviceid.replace(/'/g, "\\'");
+      const safeId = d.deviceid.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
       return `
         <tr>
@@ -1220,7 +1074,7 @@ async function renderDevices() {
           <td>
             <div class="scan-bar-wrap">
               <div class="scan-bar-track">
-                <div class="scan-bar-fill" style="width:${pct}%"></div>
+                <div class="scan-bar-fill" style="width:${Math.min(pct,100)}%"></div>
               </div>
               <span class="scan-label">${d.scan_count}/${d.max_scans}</span>
             </div>
@@ -1235,8 +1089,7 @@ async function renderDevices() {
               <button class="act-btn act-reset"   onclick="resetCooldown('${safeId}')">Reset</button>
             </div>
           </td>
-        </tr>
-      `;
+        </tr>`;
     }).join('');
 
   } catch (err) {
@@ -1245,70 +1098,64 @@ async function renderDevices() {
 }
 
 /* ============================================
-  DEVICE ACTIONS — with feedback
+   DEVICE ACTIONS
 ============================================ */
 
 async function blockDevice(deviceId) {
-  const res  = await fetch(`${API}/api/block-device`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ deviceId })
+  const r = await fetch(`${API}/api/block-device`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ deviceId })
   });
-  const data = await res.json();
-  if (data.ok) { toast('Device blocked', 'warn'); renderDevices(); }
-  else toast('Block failed: ' + (data.reason || 'unknown'), 'error');
+  const d = await r.json();
+  if (d.ok) { toast('Device blocked', 'warn'); renderDevices(); }
+  else toast('Block failed: ' + (d.reason || 'unknown'), 'error');
 }
 
 async function unblockDevice(deviceId) {
-  const res  = await fetch(`${API}/api/unblock-device`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ deviceId })
+  const r = await fetch(`${API}/api/unblock-device`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ deviceId })
   });
-  const data = await res.json();
-  if (data.ok) { toast('Device unblocked'); renderDevices(); }
-  else toast('Unblock failed: ' + (data.reason || 'unknown'), 'error');
+  const d = await r.json();
+  if (d.ok) { toast('Device unblocked'); renderDevices(); }
+  else toast('Unblock failed: ' + (d.reason || 'unknown'), 'error');
 }
 
 async function resetCooldown(deviceId) {
-  const res  = await fetch(`${API}/api/reset-cooldown`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ deviceId })
+  const r = await fetch(`${API}/api/reset-cooldown`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ deviceId })
   });
-  const data = await res.json();
-  if (data.ok) { toast('Cooldown reset'); renderDevices(); }
+  const d = await r.json();
+  if (d.ok) { toast('Cooldown reset'); renderDevices(); }
   else toast('Reset failed', 'error');
 }
 
 async function bonusScan(deviceId) {
   const val = prompt('Set max scans for this device:');
   if (!val || isNaN(Number(val))) return;
-  const res  = await fetch(`${API}/api/set-max-scans`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ deviceId, maxScans: Number(val) })
+  const r = await fetch(`${API}/api/set-max-scans`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ deviceId, maxScans: Number(val) })
   });
-  const data = await res.json();
-  if (data.ok) { toast('Max scans updated'); renderDevices(); }
+  const d = await r.json();
+  if (d.ok) { toast('Max scans updated'); renderDevices(); }
   else toast('Update failed', 'error');
 }
 
 /* ============================================
-  EXPORT CSV
+   EXPORT CSV
 ============================================ */
 
 async function exportCSV() {
   const res = await fetch(`${API}/api/log`);
   const log = await res.json();
-
   const rows = [
-    ['#', 'User', 'Device', 'Time', 'Type'],
-    ...log.map((e, i) => [i + 1, e.userid, e.deviceid, e.fulltime, e.type])
+    ['#','User','Device','Time','Type'],
+    ...log.map((e,i) => [i+1, e.userid, e.deviceid, e.fulltime, e.type])
   ];
-
   const csv  = rows.map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const blob = new Blob([csv], { type:'text/csv' });
   const a    = document.createElement('a');
   a.href     = URL.createObjectURL(blob);
   a.download = `attendance_${new Date().toLocaleDateString('en-US').replace(/\//g,'-')}.csv`;
@@ -1316,81 +1163,50 @@ async function exportCSV() {
   toast('CSV exported');
 }
 
-/* ============================================
-  CLEAR LOG
-============================================ */
-
 function clearLog() {
   alert('Clear records directly in your Supabase dashboard under the attendance table.');
 }
 
 /* ============================================
-  SCAN PAGE — INIT
+   SCAN PAGE
 ============================================ */
 
 async function initScanPage(token) {
   const deviceId = getDeviceId();
-
   const res  = await fetch(`${API}/api/checkin`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, deviceId })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ token, deviceId })
   });
   const data = await res.json();
-
   if (!data.ok) {
-    if (data.reason === 'need_id') return; // show form, wait for ID entry
-    if (data.reason === 'expired') {
-      showExpired();
-      return;
-    }
-    showError(data.reason);
-    return;
+    if (data.reason === 'need_id') return;
+    if (data.reason === 'expired') { showExpired(); return; }
+    showScanError(data.reason); return;
   }
-
   showSuccess(data.userId, data.type);
 }
-
-/* ============================================
-  SUBMIT ID
-============================================ */
 
 async function submitID() {
   const userId = document.getElementById('idInput').value.trim();
   if (!userId) return;
-
   const token    = new URLSearchParams(location.search).get('t');
   const deviceId = getDeviceId();
-
   const res  = await fetch(`${API}/api/checkin`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, deviceId, userId })
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ token, deviceId, userId })
   });
   const data = await res.json();
-
-  if (!data.ok) {
-    showError(data.reason);
-    return;
-  }
-
+  if (!data.ok) { showScanError(data.reason); return; }
   showSuccess(data.userId, data.type);
 }
-
-/* ============================================
-  SCAN PAGE STATES
-============================================ */
 
 function showSuccess(userId, type) {
   document.getElementById('formState').style.display    = 'none';
   document.getElementById('expiredState').style.display = 'none';
-
-  document.getElementById('successID').textContent   = userId;
-  document.getElementById('successType').textContent =
-    type === 'returning' ? '↩ Welcome back!' : '● First time check-in';
-
-  const el = document.getElementById('successState');
-  el.style.display = 'block';
+  document.getElementById('successID').textContent      = userId;
+  document.getElementById('successType').textContent    =
+    type === 'returning' ? '↩ Welcome back!' : '● First check-in today';
+  document.getElementById('successState').style.display = 'block';
 }
 
 function showExpired() {
@@ -1399,37 +1215,35 @@ function showExpired() {
   document.getElementById('expiredState').style.display = 'block';
 }
 
-function showError(reason) {
+function showScanError(reason) {
   const map = {
     expired:        'QR code expired — please re-scan',
     blocked:        'This device has been blocked',
-    cooldown:       'Cooldown active — try again later',
+    cooldown:       'Scan limit reached — try again later',
     already_scanned:'Already checked in today',
     user_taken:     'This ID is linked to another device',
     db_error:       'Server error — please try again',
   };
-  const el  = document.getElementById('errorMsg');
-  el.textContent    = map[reason] || ('Error: ' + reason);
-  el.style.display  = 'block';
+  const el = document.getElementById('errorMsg');
+  el.textContent   = map[reason] || ('Error: ' + reason);
+  el.style.display = 'block';
 }
 
 /* ============================================
-  NAVIGATION
+   NAVIGATION
 ============================================ */
 
 function showPage(id) {
-  document.querySelectorAll('.page')
-    .forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('nav button')
-    .forEach(b => b.classList.remove('active'));
-
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('nav button')
-    .forEach(b => { if (b.textContent.toLowerCase().includes(id.slice(0,4))) b.classList.add('active'); });
+  document.querySelectorAll('nav button').forEach(b => {
+    if (b.textContent.toLowerCase().includes(id.slice(0,4))) b.classList.add('active');
+  });
 }
 
 /* ============================================
-  BOOT
+   BOOT
 ============================================ */
 
 window.onload = async () => {
@@ -1437,7 +1251,6 @@ window.onload = async () => {
   const isAdmin = params.get('admin') === 'mocha123';
   const isScan  = params.get('scan')  === '1';
 
-  // Hide nav & admin on scan page
   if (!isAdmin && !isScan) {
     document.getElementById('mainNav').style.display = 'none';
     document.getElementById('page-admin').classList.remove('active');
@@ -1447,7 +1260,6 @@ window.onload = async () => {
     await fetchToken();
     renderLog();
     renderDevices();
-
     setInterval(fetchToken,    5000);
     setInterval(updateTimer,   1000);
     setInterval(renderLog,    10000);
@@ -1459,10 +1271,9 @@ window.onload = async () => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-scan').classList.add('active');
     initScanPage(params.get('t'));
-
-    // Enter key on input
-    document.getElementById('idInput')
-      .addEventListener('keydown', e => { if (e.key === 'Enter') submitID(); });
+    document.getElementById('idInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') submitID();
+    });
   }
 };
 
