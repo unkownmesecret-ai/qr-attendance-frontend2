@@ -1,1595 +1,1471 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta
-  name="viewport"
-  content="width=device-width, initial-scale=1.0"
-/>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>QR Attendance</title>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <style>
 
-:root{
+/* ============================================
+  RESET & ROOT
+============================================ */
 
-  --bg:#0f172a;
-  --card:#111827;
-  --border:#1e293b;
-
-  --green:#22c55e;
-  --yellow:#eab308;
-  --red:#ef4444;
-
-  --text:#f8fafc;
-  --muted:#94a3b8;
-
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-*{
+:root {
+  --bg:        #080c12;
+  --surface:   #0d1117;
+  --panel:     #111820;
+  --border:    #1c2535;
+  --border-hi: #2a3a52;
 
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:Arial, Helvetica, sans-serif;
+  --accent:    #00e5a0;
+  --accent-dim:#00b87f;
+  --accent-glow: rgba(0,229,160,.15);
 
+  --warn:      #f59e0b;
+  --danger:    #f43f5e;
+  --info:      #3b82f6;
+
+  --text:      #e8f0fe;
+  --muted:     #5a7090;
+  --subtle:    #2a3a52;
+
+  --mono: 'Space Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+
+  --radius-sm: 8px;
+  --radius:    14px;
+  --radius-lg: 22px;
 }
 
-body{
+html { font-size: 14px; }
 
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ============================================
-NAV
+  SCROLLBAR
 ============================================ */
 
-nav{
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--subtle); border-radius: 99px; }
 
-  display:flex;
-  gap:10px;
+/* ============================================
+  GRID BG
+============================================ */
 
-  padding:20px;
-
-  background:#0b1220;
-
-  border-bottom:1px solid var(--border);
-
-}
-
-nav button{
-
-  border:none;
-
-  padding:12px 18px;
-
-  border-radius:12px;
-
-  background:#1e293b;
-
-  color:white;
-
-  cursor:pointer;
-
-  font-weight:bold;
-
-}
-
-nav button.active{
-
-  background:var(--green);
-
-  color:black;
-
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .3;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ============================================
-PAGES
+  NAV
 ============================================ */
 
-.page{
-
-  display:none;
-
-  padding:30px;
-
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: rgba(8,12,18,.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
 }
 
-.page.active{
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: .05em;
+  margin-right: auto;
+}
 
-  display:block;
+.nav-logo span {
+  color: var(--muted);
+}
 
+nav button {
+  border: 1px solid var(--border);
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: all .2s;
+}
+
+nav button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+nav button.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  font-weight: 700;
 }
 
 /* ============================================
-CARD
+  PAGES
 ============================================ */
 
-.card{
-
-  max-width:520px;
-
-  margin:auto;
-
-  background:var(--card);
-
-  border:1px solid var(--border);
-
-  border-radius:24px;
-
-  padding:30px;
-
-  text-align:center;
-
-  box-shadow:
-    0 0 30px rgba(0,0,0,.25);
-
+.page {
+  display: none;
+  position: relative;
+  z-index: 1;
 }
 
-h1{
+.page.active { display: block; }
 
-  margin-bottom:20px;
+/* ============================================
+  ADMIN LAYOUT
+============================================ */
 
+.admin-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 53px);
+}
+
+/* ----- LEFT SIDEBAR ----- */
+
+.sidebar {
+  padding: 28px 20px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
+  overflow-y: auto;
+}
+
+/* QR CARD */
+
+.qr-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+}
+
+.qr-card h2 {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+#qrcode {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px var(--accent-glow);
+}
+
+#qrcode img, #qrcode canvas {
+  display: block;
+}
+
+/* TIMER */
+
+.timer-section { width: 100%; }
+
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.timer-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+#timerCount {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+}
+
+.timer-track {
+  width: 100%;
+  height: 6px;
+  background: var(--subtle);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+#timerFill {
+  height: 100%;
+  width: 100%;
+  border-radius: 99px;
+  background: var(--accent);
+  transition: width 1s linear, background .4s ease;
+}
+
+/* TOKEN DISPLAY */
+
+.token-display {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-top: 14px;
+}
+
+.token-display .tl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 4px;
+}
+
+#tokenSpan {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+/* SIDEBAR STATS */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-box {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-box .sv {
+  font-family: var(--mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.stat-box .sk {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+/* SIDEBAR BUTTONS */
+
+.sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  border: none;
+  padding: 11px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.btn-primary:hover {
+  background: #00ffb5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: white;
 }
 
 /* ============================================
-QR
+  MAIN CONTENT
 ============================================ */
 
-#qrcode{
+.main-content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
 
-  width:220px;
-  height:220px;
+/* SECTION HEADERS */
 
-  margin:auto;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.section-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
 
-  border-radius:20px;
-
-  overflow:hidden;
-
-  background:#0b1220;
-
+.section-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-glow);
+  border: 1px solid rgba(0,229,160,.2);
+  padding: 3px 10px;
+  border-radius: 99px;
 }
 
 /* ============================================
-TOKEN
+  TABLES
 ============================================ */
 
-.token{
+.table-wrap { overflow-x: auto; }
 
-  margin-top:18px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 580px;
+}
 
-  color:var(--muted);
+th {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
 
-  font-size:12px;
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text);
+}
 
-  word-break:break-all;
+tr:last-child td { border-bottom: none; }
 
+tbody tr {
+  transition: background .15s;
+}
+
+tbody tr:hover { background: rgba(255,255,255,.02); }
+
+.mono-cell {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.badge-new {
+  background: rgba(0,229,160,.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,229,160,.2);
+}
+
+.badge-returning {
+  background: rgba(59,130,246,.1);
+  color: #60a5fa;
+  border: 1px solid rgba(59,130,246,.2);
+}
+
+.badge-active {
+  background: rgba(0,229,160,.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,229,160,.2);
+}
+
+.badge-blocked {
+  background: rgba(244,63,94,.1);
+  color: var(--danger);
+  border: 1px solid rgba(244,63,94,.25);
+}
+
+.badge-cooldown {
+  background: rgba(245,158,11,.1);
+  color: var(--warn);
+  border: 1px solid rgba(245,158,11,.2);
+}
+
+/* ACTION BUTTONS IN TABLE */
+
+.action-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.act-btn {
+  border: none;
+  padding: 5px 11px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  transition: all .15s;
+}
+
+.act-btn:hover { opacity: .85; transform: translateY(-1px); }
+.act-btn:active { transform: translateY(0); }
+
+.act-block   { background: rgba(244,63,94,.15);  color: var(--danger); border: 1px solid rgba(244,63,94,.3); }
+.act-unblock { background: rgba(0,229,160,.12);  color: var(--accent); border: 1px solid rgba(0,229,160,.3); }
+.act-bonus   { background: rgba(59,130,246,.12); color: #60a5fa;       border: 1px solid rgba(59,130,246,.3); }
+.act-reset   { background: rgba(245,158,11,.12); color: var(--warn);   border: 1px solid rgba(245,158,11,.3); }
+
+/* SCAN BAR */
+
+.scan-bar-wrap { display: flex; align-items: center; gap: 8px; }
+
+.scan-bar-track {
+  flex: 1;
+  height: 4px;
+  background: var(--subtle);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.scan-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 99px;
+  transition: width .3s;
+}
+
+.scan-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* EMPTY STATE */
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .08em;
 }
 
 /* ============================================
-INPUT
+  TOAST
 ============================================ */
 
-input{
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
 
-  width:100%;
+.toast-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  animation: toastIn .25s ease;
+  min-width: 220px;
+}
 
-  padding:15px;
+.toast-item.success { border-color: rgba(0,229,160,.4); }
+.toast-item.error   { border-color: rgba(244,63,94,.4); }
+.toast-item.warn    { border-color: rgba(245,158,11,.4); }
 
-  border:none;
+.toast-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 
-  border-radius:14px;
+.toast-item.success .toast-dot { background: var(--accent); }
+.toast-item.error   .toast-dot { background: var(--danger); }
+.toast-item.warn    .toast-dot { background: var(--warn); }
 
-  background:#1e293b;
-
-  color:white;
-
-  margin-top:20px;
-
-  font-size:16px;
-
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* ============================================
-BUTTONS
+  SCAN PAGE
 ============================================ */
 
-button.submit{
+.scan-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
 
-  width:100%;
+.scan-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
 
-  margin-top:18px;
+/* Glow halo behind card */
+.scan-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent-glow), transparent 60%);
+  z-index: -1;
+  opacity: .5;
+}
 
-  padding:15px;
+.scan-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent-glow);
+  border: 1px solid rgba(0,229,160,.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 26px;
+}
 
-  border:none;
+.scan-card h1 {
+  font-family: var(--mono);
+  font-size: 16px;
+  letter-spacing: .06em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
 
-  border-radius:14px;
+.scan-card p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+}
 
-  background:var(--green);
+.scan-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: .04em;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  text-align: center;
+}
 
-  color:black;
+.scan-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
 
-  font-size:16px;
+.scan-input::placeholder { color: var(--subtle); }
 
-  font-weight:bold;
+.scan-submit {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: #000;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .2s;
+}
 
-  cursor:pointer;
+.scan-submit:hover {
+  background: #00ffb5;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  transform: translateY(-1px);
+}
 
+.scan-submit:active { transform: translateY(0); }
+
+.scan-error {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(244,63,94,.08);
+  border: 1px solid rgba(244,63,94,.2);
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .05em;
+  display: none;
+}
+
+/* SUCCESS STATE */
+
+.scan-success {
+  display: none;
+  animation: successIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes successIn {
+  from { opacity: 0; transform: scale(.9) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.success-check {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(0,229,160,.12);
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+}
+
+.success-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.success-id {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.success-type {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* EXPIRED STATE */
+
+.scan-expired {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.expired-icon {
+  font-size: 40px;
+  margin-bottom: 14px;
+}
+
+.expired-label {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--danger);
+  letter-spacing: .06em;
 }
 
 /* ============================================
-SUCCESS / ERROR
+  ANIMATIONS
 ============================================ */
 
-.success{
+.qrFadeOut { animation: fadeOut .3s ease forwards; }
+.qrFadeIn  { animation: fadeIn  .3s ease forwards; }
 
-  margin-top:20px;
-
-  color:var(--green);
-
-  font-size:22px;
-
-  font-weight:bold;
-
+@keyframes fadeOut {
+  to { opacity: 0; transform: scale(.94); }
 }
-
-.error{
-
-  margin-top:15px;
-
-  color:var(--red);
-
-  font-weight:bold;
-
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ============================================
-TABLES
+  RESPONSIVE
 ============================================ */
 
-.tableWrap{
-
-  overflow-x:auto;
-
-}
-
-table{
-
-  width:100%;
-
-  border-collapse:collapse;
-
-  margin-top:20px;
-
-  min-width:900px;
-
-}
-
-th{
-
-  color:var(--muted);
-
-  text-align:left;
-
-  padding:14px;
-
-  border-bottom:1px solid var(--border);
-
-}
-
-td{
-
-  padding:14px;
-
-  border-bottom:1px solid var(--border);
-
-}
-
-tr:hover{
-
-  background:#0b1220;
-
-}
-
-/* ============================================
-CONTROLS
-============================================ */
-
-.controls{
-
-  display:flex;
-
-  gap:10px;
-
-  margin-bottom:20px;
-
-  flex-wrap:wrap;
-
-}
-
-.controls button{
-
-  border:none;
-
-  padding:12px 16px;
-
-  border-radius:10px;
-
-  font-weight:bold;
-
-  cursor:pointer;
-
-}
-
-.export{
-
-  background:var(--green);
-
-  color:black;
-
-}
-
-.clear{
-
-  background:var(--red);
-
-  color:white;
-
-}
-
-/* ============================================
-TIMER BAR
-============================================ */
-
-.timerWrap{
-
-  margin-top:25px;
-
-}
-
-.timerBar{
-
-  width:100%;
-
-  height:18px;
-
-  background:#1e293b;
-
-  border-radius:999px;
-
-  overflow:hidden;
-
-  border:1px solid #334155;
-
-}
-
-#timerFill{
-
-  height:100%;
-
-  width:100%;
-
-  background:var(--green);
-
-  transition:
-    width 1s linear,
-    background .3s ease;
-
-}
-
-/* ============================================
-ANIMATIONS
-============================================ */
-
-.qrFadeOut{
-
-  animation:fadeOut .35s ease forwards;
-
-}
-
-.qrFadeIn{
-
-  animation:fadeIn .35s ease forwards;
-
-}
-
-.qrShake{
-
-  animation:shake .35s ease;
-
-}
-
-@keyframes fadeOut{
-
-  from{
-    opacity:1;
-    transform:scale(1);
+@media (max-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
   }
-
-  to{
-    opacity:0;
-    transform:scale(.92);
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
   }
-
-}
-
-@keyframes fadeIn{
-
-  from{
-    opacity:0;
-    transform:scale(.92);
-  }
-
-  to{
-    opacity:1;
-    transform:scale(1);
-  }
-
-}
-
-@keyframes shake{
-
-  0%{
-    transform:translateX(0);
-  }
-
-  25%{
-    transform:translateX(-4px);
-  }
-
-  50%{
-    transform:translateX(4px);
-  }
-
-  75%{
-    transform:translateX(-4px);
-  }
-
-  100%{
-    transform:translateX(0);
-  }
-
-}
-
-/* ============================================
-MODERATION PANEL
-============================================ */
-
-.moderationCard{
-
-  margin-top:40px;
-
-  background:#111827;
-
-  border:1px solid var(--border);
-
-  border-radius:24px;
-
-  padding:25px;
-
-}
-
-.moderationHeader{
-
-  display:flex;
-
-  justify-content:space-between;
-
-  align-items:center;
-
-  margin-bottom:20px;
-
-}
-
-.refreshBtn{
-
-  background:var(--green);
-
-  color:black;
-
-  border:none;
-
-  padding:10px 16px;
-
-  border-radius:10px;
-
-  cursor:pointer;
-
-  font-weight:bold;
-
-}
-
-.statusBlocked{
-
-  color:var(--red);
-
-  font-weight:bold;
-
-}
-
-.statusActive{
-
-  color:var(--green);
-
-  font-weight:bold;
-
-}
-
-.actionButtons{
-
-  display:flex;
-
-  gap:8px;
-
-  flex-wrap:wrap;
-
-}
-
-.actionButtons button{
-
-  border:none;
-
-  padding:8px 12px;
-
-  border-radius:8px;
-
-  cursor:pointer;
-
-  font-weight:bold;
-
-}
-
-.btnBlock{
-
-  background:var(--red);
-
-  color:white;
-
-}
-
-.btnUnblock{
-
-  background:var(--green);
-
-  color:black;
-
-}
-
-.btnBonus{
-
-  background:#3b82f6;
-
-  color:white;
-
-}
-
-.btnReset{
-
-  background:#f59e0b;
-
-  color:black;
-
 }
 
 </style>
-
 </head>
-
 <body>
 
+<!-- TOAST -->
+<div id="toast"></div>
+
 <!-- ============================================
-NAV
+  NAV
 ============================================ -->
 
-<nav>
-
-  <button
-    class="active"
-    onclick="showPage('admin')"
-  >
-    Admin
-  </button>
-
-  <button
-    onclick="showPage('scan')"
-  >
-    Scan
-  </button>
-
+<nav id="mainNav">
+  <div class="nav-logo">QR<span>/</span>ATTENDANCE</div>
+  <button class="active" onclick="showPage('admin')">Admin</button>
+  <button onclick="showPage('scan')">Scan</button>
 </nav>
 
 <!-- ============================================
-ADMIN PAGE
+  ADMIN PAGE
 ============================================ -->
 
-<div
-  class="page active"
-  id="page-admin"
->
+<div class="page active" id="page-admin">
+  <div class="admin-layout">
 
-  <div class="card">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
 
-    <h1>QR Attendance</h1>
+      <!-- QR -->
+      <div class="qr-card">
+        <h2>Live QR Code</h2>
+        <div id="qrcode"></div>
 
-    <div id="qrcode"></div>
+        <div class="timer-section">
+          <div class="timer-header">
+            <span class="timer-label">Expires in</span>
+            <span id="timerCount">35s</span>
+          </div>
+          <div class="timer-track">
+            <div id="timerFill"></div>
+          </div>
+        </div>
 
-    <div class="timerWrap">
-
-      <div class="timerBar">
-
-        <div id="timerFill"></div>
-
+        <div class="token-display">
+          <div class="tl">Token</div>
+          <div id="tokenSpan">—</div>
+        </div>
       </div>
 
-    </div>
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-box">
+          <div class="sv" id="statTotal">—</div>
+          <div class="sk">Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="sv" id="statToday">—</div>
+          <div class="sk">Today</div>
+        </div>
+        <div class="stat-box">
+          <div class="sv" id="statDevices">—</div>
+          <div class="sk">Devices</div>
+        </div>
+        <div class="stat-box">
+          <div class="sv" id="statBlocked">—</div>
+          <div class="sk">Blocked</div>
+        </div>
+      </div>
 
-    <div class="token">
-
-      Token:
-
-      <span id="tokenSpan"></span>
-
-    </div>
-
-  </div>
-
-  <!-- CONTROLS -->
-
-  <div
-    style="
-      max-width:1200px;
-      margin:auto;
-      margin-top:40px;
-    "
-  >
-
-    <div class="controls">
-
-      <button
-        class="export"
-        onclick="exportCSV()"
-      >
-        Export CSV
-      </button>
-
-      <button
-        class="clear"
-        onclick="clearLog()"
-      >
-        Clear
-      </button>
-
-      <button
-        onclick="forceResetToken()"
-      >
-        Force Reset QR
-      </button>
-
-    </div>
-
-    <!-- LOG TABLE -->
-
-    <div class="tableWrap">
-
-      <div id="logContainer"></div>
-
-    </div>
-
-    <!-- MODERATION -->
-
-    <div class="moderationCard">
-
-      <div class="moderationHeader">
-
-        <h2>Device Moderation</h2>
-
-        <button
-          class="refreshBtn"
-          onclick="renderDevices()"
-        >
-          Refresh
+      <!-- ACTIONS -->
+      <div class="sidebar-actions">
+        <button class="btn btn-primary" onclick="exportCSV()">
+          ↓ Export CSV
         </button>
-
+        <button class="btn btn-ghost" onclick="forceResetToken()">
+          ↺ Force Reset QR
+        </button>
+        <button class="btn btn-danger" onclick="clearLog()">
+          ✕ Clear Log
+        </button>
       </div>
 
-      <div class="tableWrap">
+    </aside>
 
-        <table>
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
 
-          <thead>
+      <!-- ATTENDANCE LOG -->
+      <section>
+        <div class="section-header">
+          <span class="section-title">Attendance Log</span>
+          <span class="section-count" id="logCount">0 records</span>
+        </div>
+        <div class="table-wrap">
+          <div id="logContainer">
+            <div class="empty-state">Loading records...</div>
+          </div>
+        </div>
+      </section>
 
-            <tr>
+      <!-- DEVICE MODERATION -->
+      <section>
+        <div class="section-header">
+          <span class="section-title">Device Moderation</span>
+          <button class="btn btn-ghost" style="padding:6px 14px" onclick="renderDevices()">
+            ↺ Refresh
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Device ID</th>
+                <th>Scans</th>
+                <th>Status</th>
+                <th>Cooldown Until</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="deviceContainer">
+              <tr><td colspan="6" class="empty-state">Loading devices...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-              <th>User</th>
-              <th>Device</th>
-              <th>Scans</th>
-              <th>Max</th>
-              <th>Status</th>
-              <th>Cooldown</th>
-              <th>Actions</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody id="deviceContainer">
-
-            <tr>
-
-              <td colspan="7">
-                Loading...
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
-
+    </main>
   </div>
-
 </div>
 
 <!-- ============================================
-SCAN PAGE
+  SCAN PAGE
 ============================================ -->
 
-<div
-  class="page"
-  id="page-scan"
->
+<div class="page" id="page-scan">
+  <div class="scan-page">
+    <div class="scan-card">
 
-  <div class="card">
+      <!-- FORM STATE -->
+      <div id="formState">
+        <div class="scan-icon">🎓</div>
+        <h1>Student Check-In</h1>
+        <p>Enter your student ID to record attendance</p>
+        <input
+          class="scan-input"
+          id="idInput"
+          type="text"
+          placeholder="e.g. STU-00123"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+        />
+        <button class="scan-submit" onclick="submitID()">
+          Confirm Attendance
+        </button>
+        <div class="scan-error" id="errorMsg"></div>
+      </div>
 
-    <h1>Student Check-In</h1>
+      <!-- SUCCESS STATE -->
+      <div class="scan-success" id="successState">
+        <div class="success-check">✓</div>
+        <div class="success-label">Attendance Recorded</div>
+        <div class="success-id" id="successID">—</div>
+        <div class="success-type" id="successType"></div>
+      </div>
 
-    <div id="formState">
-
-      <input
-        id="idInput"
-        type="text"
-        placeholder="Enter Student ID"
-      />
-
-      <button
-        class="submit"
-        onclick="submitID()"
-      >
-        Check In
-      </button>
-
-      <div
-        class="error"
-        id="errorMsg"
-      ></div>
-
-    </div>
-
-    <div
-      class="success"
-      id="successState"
-      style="display:none;"
-    >
-
-      Attendance Recorded
-
-      <br><br>
-
-      ID:
-
-      <span id="successID"></span>
+      <!-- EXPIRED STATE -->
+      <div class="scan-expired" id="expiredState">
+        <div class="expired-icon">⏱</div>
+        <div class="expired-label">QR Code Expired<br>Please Scan Again</div>
+      </div>
 
     </div>
-
-    <div
-      class="error"
-      id="expiredState"
-      style="display:none;"
-    >
-
-      QR Expired. Scan Again.
-
-    </div>
-
   </div>
-
 </div>
+
+<!-- ============================================
+  SCRIPT
+============================================ -->
 
 <script>
 
-const API =
-'https://qr-attendance-backend-production-0d3b.up.railway.app';
-
+const API  = 'https://qr-attendance-backend-production-0d3b.up.railway.app';
 const TICK = 35;
-
 let timeLeft = TICK;
 
 /* ============================================
-DEVICE ID
+  DEVICE ID
 ============================================ */
 
-const DB = {
-
-  getDeviceId(){
-
-    let id =
-      localStorage.getItem(
-        'qr_device_id'
-      );
-
-    if(!id){
-
-      id =
-        'dev_' +
-        Math.random()
-          .toString(36)
-          .slice(2,10);
-
-      localStorage.setItem(
-        'qr_device_id',
-        id
-      );
-
-    }
-
-    return id;
-
+function getDeviceId() {
+  let id = localStorage.getItem('qr_device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('qr_device_id', id);
   }
-
-};
-
-/* ============================================
-QR
-============================================ */
-
-function buildQR(url){
-
-  const qrcode =
-    document.getElementById('qrcode');
-
-  qrcode.innerHTML = '';
-
-  new QRCode(qrcode, {
-
-    text:url,
-
-    width:200,
-
-    height:200,
-
-    colorDark:"#000000",
-
-    colorLight:"#0f172a",
-
-    correctLevel:
-      QRCode.CorrectLevel.H
-
-  });
-
+  return id;
 }
 
 /* ============================================
-TOKEN
+  TOAST
 ============================================ */
 
-async function fetchToken(){
+function toast(msg, type = 'success') {
+  const wrap = document.getElementById('toast');
+  const el = document.createElement('div');
+  el.className = `toast-item ${type}`;
+  el.innerHTML = `<div class="toast-dot"></div>${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
 
-  try{
+/* ============================================
+  QR
+============================================ */
 
-    const res =
-      await fetch(`${API}/api/token`);
+function buildQR(url) {
+  const el = document.getElementById('qrcode');
+  el.innerHTML = '';
+  new QRCode(el, {
+    text: url,
+    width: 192,
+    height: 192,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
 
-    const data =
-      await res.json();
+/* ============================================
+  FETCH TOKEN
+============================================ */
+
+async function fetchToken() {
+  try {
+    const res  = await fetch(`${API}/api/token`);
+    const data = await res.json();
 
     buildQR(data.url);
-
-    document
-      .getElementById('tokenSpan')
-      .textContent = data.token;
-
-    timeLeft =
-      Math.floor(
-        (data.expires - Date.now()) / 1000
-      );
-
-  }catch(err){
-
-    console.error(err);
-
+    document.getElementById('tokenSpan').textContent = data.token;
+    timeLeft = Math.max(1, Math.floor((data.expires - Date.now()) / 1000));
+  } catch (err) {
+    console.error('[fetchToken]', err);
   }
-
 }
 
 /* ============================================
-FORCE RESET
+  FORCE RESET
 ============================================ */
 
-async function forceResetToken(){
-
-  await fetch(
-    `${API}/api/reset-token`,
-    {
-      method:'POST'
-    }
-  );
-
-  fetchToken();
-
+async function forceResetToken() {
+  await fetch(`${API}/api/reset-token`, { method: 'POST' });
+  await fetchToken();
+  toast('QR token reset');
 }
 
 /* ============================================
-TIMER
+  TIMER
 ============================================ */
 
-function updateTimer(){
+function updateTimer() {
+  timeLeft = Math.max(0, timeLeft - 1);
 
-  timeLeft--;
+  const fill    = document.getElementById('timerFill');
+  const counter = document.getElementById('timerCount');
+  const pct     = (timeLeft / TICK) * 100;
 
-  const fill =
-    document.getElementById(
-      'timerFill'
-    );
+  fill.style.width      = pct + '%';
+  counter.textContent   = timeLeft + 's';
 
-  const percent =
-    (timeLeft / TICK) * 100;
+  fill.style.background =
+    pct > 60 ? 'var(--accent)' :
+    pct > 25 ? 'var(--warn)'   :
+               'var(--danger)';
 
-  fill.style.width =
-    percent + '%';
-
-  if(percent > 60){
-
-    fill.style.background =
-      '#22c55e';
-
-  }
-
-  else if(percent > 25){
-
-    fill.style.background =
-      '#eab308';
-
-  }
-
-  else{
-
-    fill.style.background =
-      '#ef4444';
-
-  }
-
-  if(timeLeft <= 5){
-
-    fill.classList.add('qrShake');
-
-    setTimeout(()=>{
-
-      fill.classList.remove(
-        'qrShake'
-      );
-
-    },350);
-
-  }
-
-  if(timeLeft <= 0){
-
-    const qr =
-      document.getElementById(
-        'qrcode'
-      );
-
-    qr.classList.add(
-      'qrFadeOut'
-    );
-
-    setTimeout(async ()=>{
-
+  if (timeLeft <= 0) {
+    const qr = document.getElementById('qrcode');
+    qr.classList.add('qrFadeOut');
+    setTimeout(async () => {
       await fetchToken();
-
-      qr.classList.remove(
-        'qrFadeOut'
-      );
-
-      qr.classList.add(
-        'qrFadeIn'
-      );
-
-    },350);
-
+      qr.classList.remove('qrFadeOut');
+      qr.classList.add('qrFadeIn');
+      setTimeout(() => qr.classList.remove('qrFadeIn'), 400);
+    }, 320);
   }
-
 }
 
 /* ============================================
-LOG TABLE
+  RENDER LOG
 ============================================ */
 
-async function renderLog(){
+async function renderLog() {
+  try {
+    const res = await fetch(`${API}/api/log`);
+    const log = await res.json();
 
-  const res =
-    await fetch(`${API}/api/log`);
+    document.getElementById('statTotal').textContent = log.length;
 
-  const log =
-    await res.json();
+    const today     = new Date().toLocaleDateString('en-US');
+    const todayRows = log.filter(e => e.date === today);
+    document.getElementById('statToday').textContent = todayRows.length;
+    document.getElementById('logCount').textContent  = log.length + ' records';
 
-  const container =
-    document.getElementById(
-      'logContainer'
-    );
+    const container = document.getElementById('logContainer');
 
-  container.innerHTML = `
+    if (!log.length) {
+      container.innerHTML = '<div class="empty-state">No records yet</div>';
+      return;
+    }
 
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>#</th>
-          <th>User</th>
-          <th>Device</th>
-          <th>Date & Time</th>
-          <th>Type</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        ${log.map((e,i)=>`
-
+    container.innerHTML = `
+      <table>
+        <thead>
           <tr>
-
-            <td>${i+1}</td>
-
-            <td>${e.userid}</td>
-
-            <td>${e.deviceid}</td>
-
-            <td>${e.fulltime}</td>
-
-            <td>${e.type}</td>
-
+            <th>#</th>
+            <th>User ID</th>
+            <th>Device</th>
+            <th>Date & Time</th>
+            <th>Type</th>
           </tr>
-
-        `).join('')}
-
-      </tbody>
-
-    </table>
-
-  `;
-
+        </thead>
+        <tbody>
+          ${log.map((e, i) => `
+            <tr>
+              <td class="mono-cell">${i + 1}</td>
+              <td>${e.userid}</td>
+              <td class="mono-cell">${e.deviceid}</td>
+              <td class="mono-cell">${e.fulltime}</td>
+              <td>
+                <span class="badge badge-${e.type}">
+                  ${e.type === 'new' ? '● New' : '↩ Return'}
+                </span>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  } catch (err) {
+    console.error('[renderLog]', err);
+  }
 }
 
 /* ============================================
-DEVICE MODERATION
+  RENDER DEVICES
 ============================================ */
 
-async function renderDevices(){
+async function renderDevices() {
+  try {
+    const res     = await fetch(`${API}/api/devices`);
+    const devices = await res.json();
 
-  const res =
-    await fetch(`${API}/api/devices`);
+    document.getElementById('statDevices').textContent = devices.length;
+    document.getElementById('statBlocked').textContent = devices.filter(d => d.is_blocked).length;
 
-  const devices =
-    await res.json();
+    const container = document.getElementById('deviceContainer');
 
-  const container =
-    document.getElementById(
-      'deviceContainer'
-    );
-
-  container.innerHTML =
-    devices.map(d => `
-
-      <tr>
-
-        <td>${d.userid}</td>
-
-        <td>${d.deviceid}</td>
-
-        <td>${d.scan_count}</td>
-
-        <td>${d.max_scans}</td>
-
-        <td>
-
-          <span class="${
-            d.is_blocked
-              ? 'statusBlocked'
-              : 'statusActive'
-          }">
-
-            ${
-              d.is_blocked
-                ? 'BLOCKED'
-                : 'ACTIVE'
-            }
-
-          </span>
-
-        </td>
-
-        <td>
-
-          ${
-            d.cooldown_until || '-'
-          }
-
-        </td>
-
-        <td>
-
-          <div class="actionButtons">
-
-            <button
-              class="btnBlock"
-              onclick="blockDevice('${d.deviceid}')"
-            >
-              Block
-            </button>
-
-            <button
-              class="btnUnblock"
-              onclick="unblockDevice('${d.deviceid}')"
-            >
-              Unblock
-            </button>
-
-            <button
-              class="btnBonus"
-              onclick="bonusScan('${d.deviceid}')"
-            >
-              Bonus
-            </button>
-
-            <button
-              class="btnReset"
-              onclick="resetCooldown('${d.deviceid}')"
-            >
-              Reset
-            </button>
-
-          </div>
-
-        </td>
-
-      </tr>
-
-    `).join('');
-
-}
-
-/* ============================================
-ACTIONS
-============================================ */
-
-async function blockDevice(deviceId){
-
-  await fetch(
-    `${API}/api/block-device`,
-    {
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify({
-        deviceId
-      })
+    if (!devices.length) {
+      container.innerHTML = `<tr><td colspan="6" class="empty-state">No devices registered</td></tr>`;
+      return;
     }
-  );
 
-  renderDevices();
+    container.innerHTML = devices.map(d => {
+      const pct = d.max_scans > 0 ? Math.round((d.scan_count / d.max_scans) * 100) : 0;
 
-}
-
-async function unblockDevice(deviceId){
-
-  await fetch(
-    `${API}/api/unblock-device`,
-    {
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify({
-        deviceId
-      })
-    }
-  );
-
-  renderDevices();
-
-}
-
-async function resetCooldown(deviceId){
-
-  await fetch(
-    `${API}/api/reset-cooldown`,
-    {
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify({
-        deviceId
-      })
-    }
-  );
-
-  renderDevices();
-
-}
-
-async function bonusScan(deviceId){
-
-  const scans =
-    prompt('Set max scans');
-
-  if(!scans) return;
-
-  await fetch(
-    `${API}/api/set-max-scans`,
-    {
-      method:'POST',
-
-      headers:{
-        'Content-Type':'application/json'
-      },
-
-      body:JSON.stringify({
-
-        deviceId,
-
-        maxScans:Number(scans)
-
-      })
-    }
-  );
-
-  renderDevices();
-
-}
-
-/* ============================================
-SCAN
-============================================ */
-
-async function initScanPage(token){
-
-  const deviceId =
-    DB.getDeviceId();
-
-  const res =
-    await fetch(
-      `${API}/api/checkin`,
-      {
-        method:'POST',
-
-        headers:{
-          'Content-Type':'application/json'
-        },
-
-        body:JSON.stringify({
-
-          token,
-
-          deviceId
-
-        })
-
+      // Determine status badge
+      let statusBadge;
+      if (d.is_blocked) {
+        statusBadge = `<span class="badge badge-blocked">Blocked</span>`;
+      } else if (d.cooldown_until && Date.now() < new Date(d.cooldown_until).getTime()) {
+        statusBadge = `<span class="badge badge-cooldown">Cooldown</span>`;
+      } else {
+        statusBadge = `<span class="badge badge-active">Active</span>`;
       }
-    );
 
-  const data =
-    await res.json();
+      const cooldownStr = d.cooldown_until
+        ? new Date(d.cooldown_until).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+        : '—';
 
-  if(!data.ok){
+      // Escape device ID for safe HTML attribute use
+      const safeId = d.deviceid.replace(/'/g, "\\'");
 
-    if(data.reason === 'need_id'){
+      return `
+        <tr>
+          <td>${d.userid || '<span style="color:var(--muted)">—</span>'}</td>
+          <td class="mono-cell">${d.deviceid}</td>
+          <td>
+            <div class="scan-bar-wrap">
+              <div class="scan-bar-track">
+                <div class="scan-bar-fill" style="width:${pct}%"></div>
+              </div>
+              <span class="scan-label">${d.scan_count}/${d.max_scans}</span>
+            </div>
+          </td>
+          <td>${statusBadge}</td>
+          <td class="mono-cell">${cooldownStr}</td>
+          <td>
+            <div class="action-row">
+              <button class="act-btn act-block"   onclick="blockDevice('${safeId}')">Block</button>
+              <button class="act-btn act-unblock" onclick="unblockDevice('${safeId}')">Unblock</button>
+              <button class="act-btn act-bonus"   onclick="bonusScan('${safeId}')">Scans</button>
+              <button class="act-btn act-reset"   onclick="resetCooldown('${safeId}')">Reset</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
 
-      return;
-
-    }
-
-    if(data.reason === 'cooldown'){
-
-      document
-        .getElementById('errorMsg')
-        .textContent =
-        'Scan cooldown active';
-
-      return;
-
-    }
-
-    if(data.reason === 'blocked'){
-
-      document
-        .getElementById('errorMsg')
-        .textContent =
-        'Device blocked';
-
-      return;
-
-    }
-
+  } catch (err) {
+    console.error('[renderDevices]', err);
   }
-
-  showSuccess(data.userId);
-
 }
 
 /* ============================================
-SUBMIT
+  DEVICE ACTIONS — with feedback
 ============================================ */
 
-async function submitID(){
+async function blockDevice(deviceId) {
+  const res  = await fetch(`${API}/api/block-device`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId })
+  });
+  const data = await res.json();
+  if (data.ok) { toast('Device blocked', 'warn'); renderDevices(); }
+  else toast('Block failed: ' + (data.reason || 'unknown'), 'error');
+}
 
-  const userId =
-    document
-      .getElementById('idInput')
-      .value
-      .trim();
+async function unblockDevice(deviceId) {
+  const res  = await fetch(`${API}/api/unblock-device`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId })
+  });
+  const data = await res.json();
+  if (data.ok) { toast('Device unblocked'); renderDevices(); }
+  else toast('Unblock failed: ' + (data.reason || 'unknown'), 'error');
+}
 
-  if(!userId){
+async function resetCooldown(deviceId) {
+  const res  = await fetch(`${API}/api/reset-cooldown`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId })
+  });
+  const data = await res.json();
+  if (data.ok) { toast('Cooldown reset'); renderDevices(); }
+  else toast('Reset failed', 'error');
+}
 
-    return;
-
-  }
-
-  const token =
-    new URLSearchParams(
-      location.search
-    ).get('t');
-
-  const deviceId =
-    DB.getDeviceId();
-
-  const res =
-    await fetch(
-      `${API}/api/checkin`,
-      {
-        method:'POST',
-
-        headers:{
-          'Content-Type':'application/json'
-        },
-
-        body:JSON.stringify({
-
-          token,
-
-          deviceId,
-
-          userId
-
-        })
-
-      }
-    );
-
-  const data =
-    await res.json();
-
-  if(!data.ok){
-
-    document
-      .getElementById('errorMsg')
-      .textContent =
-      data.reason;
-
-    return;
-
-  }
-
-  showSuccess(data.userId);
-
+async function bonusScan(deviceId) {
+  const val = prompt('Set max scans for this device:');
+  if (!val || isNaN(Number(val))) return;
+  const res  = await fetch(`${API}/api/set-max-scans`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId, maxScans: Number(val) })
+  });
+  const data = await res.json();
+  if (data.ok) { toast('Max scans updated'); renderDevices(); }
+  else toast('Update failed', 'error');
 }
 
 /* ============================================
-SUCCESS
+  EXPORT CSV
 ============================================ */
 
-function showSuccess(userId){
-
-  document
-    .getElementById('formState')
-    .style.display =
-    'none';
-
-  document
-    .getElementById('successState')
-    .style.display =
-    'block';
-
-  document
-    .getElementById('successID')
-    .textContent =
-    userId;
-
-}
-
-/* ============================================
-EXPORT
-============================================ */
-
-async function exportCSV(){
-
-  const res =
-    await fetch(`${API}/api/log`);
-
-  const log =
-    await res.json();
+async function exportCSV() {
+  const res = await fetch(`${API}/api/log`);
+  const log = await res.json();
 
   const rows = [
-
-    [
-      '#',
-      'User',
-      'Device',
-      'Time',
-      'Type'
-    ],
-
-    ...log.map((e,i)=>[
-
-      i+1,
-
-      e.userid,
-
-      e.deviceid,
-
-      e.fulltime,
-
-      e.type
-
-    ])
-
+    ['#', 'User', 'Device', 'Time', 'Type'],
+    ...log.map((e, i) => [i + 1, e.userid, e.deviceid, e.fulltime, e.type])
   ];
 
-  const csv =
-    rows.map(r=>r.join(','))
-      .join('\n');
-
-  const blob =
-    new Blob([csv],{
-      type:'text/csv'
-    });
-
-  const a =
-    document.createElement('a');
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  a.download =
-    'attendance.csv';
-
+  const csv  = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `attendance_${new Date().toLocaleDateString('en-US').replace(/\//g,'-')}.csv`;
   a.click();
-
+  toast('CSV exported');
 }
 
 /* ============================================
-CLEAR
+  CLEAR LOG
 ============================================ */
 
-function clearLog(){
-
-  alert(
-    'Clear directly in Supabase.'
-  );
-
+function clearLog() {
+  alert('Clear records directly in your Supabase dashboard under the attendance table.');
 }
 
 /* ============================================
-NAVIGATION
+  SCAN PAGE — INIT
 ============================================ */
 
-function showPage(id){
+async function initScanPage(token) {
+  const deviceId = getDeviceId();
 
-  document
-    .querySelectorAll('.page')
-    .forEach(p =>
-      p.classList.remove('active')
-    );
+  const res  = await fetch(`${API}/api/checkin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, deviceId })
+  });
+  const data = await res.json();
 
-  document
-    .getElementById('page-' + id)
-    .classList.add('active');
-
-}
-
-/* ============================================
-BOOT
-============================================ */
-
-window.onload = async ()=>{
-
-  const params =
-    new URLSearchParams(
-      location.search
-    );
-
-  const isAdmin =
-    params.get('admin') === 'mocha123';
-
-  if(!isAdmin){
-
-    document.querySelector('nav')
-      .style.display = 'none';
-
-    document
-      .getElementById('page-admin')
-      .style.display = 'none';
-
+  if (!data.ok) {
+    if (data.reason === 'need_id') return; // show form, wait for ID entry
+    if (data.reason === 'expired') {
+      showExpired();
+      return;
+    }
+    showError(data.reason);
+    return;
   }
 
-  if(isAdmin){
+  showSuccess(data.userId, data.type);
+}
 
+/* ============================================
+  SUBMIT ID
+============================================ */
+
+async function submitID() {
+  const userId = document.getElementById('idInput').value.trim();
+  if (!userId) return;
+
+  const token    = new URLSearchParams(location.search).get('t');
+  const deviceId = getDeviceId();
+
+  const res  = await fetch(`${API}/api/checkin`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, deviceId, userId })
+  });
+  const data = await res.json();
+
+  if (!data.ok) {
+    showError(data.reason);
+    return;
+  }
+
+  showSuccess(data.userId, data.type);
+}
+
+/* ============================================
+  SCAN PAGE STATES
+============================================ */
+
+function showSuccess(userId, type) {
+  document.getElementById('formState').style.display    = 'none';
+  document.getElementById('expiredState').style.display = 'none';
+
+  document.getElementById('successID').textContent   = userId;
+  document.getElementById('successType').textContent =
+    type === 'returning' ? '↩ Welcome back!' : '● First time check-in';
+
+  const el = document.getElementById('successState');
+  el.style.display = 'block';
+}
+
+function showExpired() {
+  document.getElementById('formState').style.display    = 'none';
+  document.getElementById('successState').style.display = 'none';
+  document.getElementById('expiredState').style.display = 'block';
+}
+
+function showError(reason) {
+  const map = {
+    expired:        'QR code expired — please re-scan',
+    blocked:        'This device has been blocked',
+    cooldown:       'Cooldown active — try again later',
+    already_scanned:'Already checked in today',
+    user_taken:     'This ID is linked to another device',
+    db_error:       'Server error — please try again',
+  };
+  const el  = document.getElementById('errorMsg');
+  el.textContent    = map[reason] || ('Error: ' + reason);
+  el.style.display  = 'block';
+}
+
+/* ============================================
+  NAVIGATION
+============================================ */
+
+function showPage(id) {
+  document.querySelectorAll('.page')
+    .forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button')
+    .forEach(b => b.classList.remove('active'));
+
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('nav button')
+    .forEach(b => { if (b.textContent.toLowerCase().includes(id.slice(0,4))) b.classList.add('active'); });
+}
+
+/* ============================================
+  BOOT
+============================================ */
+
+window.onload = async () => {
+  const params  = new URLSearchParams(location.search);
+  const isAdmin = params.get('admin') === 'mocha123';
+  const isScan  = params.get('scan')  === '1';
+
+  // Hide nav & admin on scan page
+  if (!isAdmin && !isScan) {
+    document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('page-admin').classList.remove('active');
+  }
+
+  if (isAdmin) {
     await fetchToken();
-
     renderLog();
-
     renderDevices();
 
-    setInterval(fetchToken,5000);
-
-    setInterval(updateTimer,1000);
-
-    setInterval(renderLog,10000);
-
+    setInterval(fetchToken,    5000);
+    setInterval(updateTimer,   1000);
+    setInterval(renderLog,    10000);
     setInterval(renderDevices,10000);
-
   }
 
-  if(params.get('scan') === '1'){
+  if (isScan) {
+    document.getElementById('mainNav').style.display = 'none';
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-scan').classList.add('active');
+    initScanPage(params.get('t'));
 
-    document
-      .querySelectorAll('.page')
-      .forEach(p =>
-        p.classList.remove('active')
-      );
-
-    document
-      .getElementById('page-scan')
-      .classList.add('active');
-
-    initScanPage(
-      params.get('t')
-    );
-
+    // Enter key on input
+    document.getElementById('idInput')
+      .addEventListener('keydown', e => { if (e.key === 'Enter') submitID(); });
   }
-
 };
 
 </script>
-
 </body>
 </html>
