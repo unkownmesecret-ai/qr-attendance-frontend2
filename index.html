@@ -484,22 +484,25 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 }
 
 #qrLarge {
-  width:320px; height:320px;
-  border-radius:var(--r-lg); overflow:hidden; background:#fff;
+  width:340px; height:340px;
+  border-radius:var(--r-lg); background:#fff;
   margin:0 auto;
   box-shadow: 0 0 60px rgba(201,168,76,.25);
   display:flex; align-items:center; justify-content:center;
   flex-shrink:0;
+  padding:16px;
+  box-sizing:border-box;
 }
 
-/* Force the generated canvas/img to fill the container exactly */
+/* Canvas sits inside the padding — never clips the quiet zone */
 #qrLarge canvas,
 #qrLarge img {
   display:block !important;
-  width:320px !important;
-  height:320px !important;
+  width:100% !important;
+  height:100% !important;
   max-width:none !important;
   flex-shrink:0;
+  border-radius:4px;
 }
 
 .lb-footer { margin-top:20px; }
@@ -941,11 +944,11 @@ function buildQR(url) {
   // Lightbox QR (always keep in sync)
   const lb = document.getElementById('qrLarge');
   lb.innerHTML = '';
-  new QRCode(lb, { text: url, width: 320, height: 320,
+  new QRCode(lb, { text: url, width: 308, height: 308,
     colorDark: '#000000', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H });
-  // The library injects both a <canvas> AND a hidden <img> which stack
-  // and cause the cut-off misalignment — strip the img after render.
+  // The library injects both a <canvas> AND a hidden <img> — remove img
+  // so only the canvas remains, perfectly centred inside the padding.
   setTimeout(() => {
     lb.querySelectorAll('img').forEach(img => img.remove());
   }, 50);
