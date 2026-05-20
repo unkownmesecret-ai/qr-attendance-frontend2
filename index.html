@@ -488,9 +488,19 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
   border-radius:var(--r-lg); overflow:hidden; background:#fff;
   margin:0 auto;
   box-shadow: 0 0 60px rgba(201,168,76,.25);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
 }
 
-#qrLarge img, #qrLarge canvas { display:block; }
+/* Force the generated canvas/img to fill the container exactly */
+#qrLarge canvas,
+#qrLarge img {
+  display:block !important;
+  width:320px !important;
+  height:320px !important;
+  max-width:none !important;
+  flex-shrink:0;
+}
 
 .lb-footer { margin-top:20px; }
 
@@ -934,6 +944,11 @@ function buildQR(url) {
   new QRCode(lb, { text: url, width: 320, height: 320,
     colorDark: '#000000', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H });
+  // The library injects both a <canvas> AND a hidden <img> which stack
+  // and cause the cut-off misalignment — strip the img after render.
+  setTimeout(() => {
+    lb.querySelectorAll('img').forEach(img => img.remove());
+  }, 50);
 }
 
 /* ============================================
