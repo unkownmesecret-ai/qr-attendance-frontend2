@@ -16,7 +16,6 @@
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
-  /* MSA palette — deep navy + gold */
   --bg:          #05080f;
   --surface:     #090d18;
   --panel:       #0d1422;
@@ -65,10 +64,6 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius:99px; }
 
-/* ============================================
-   BACKGROUND — subtle dot grid + radial glow
-============================================ */
-
 body::before {
   content:'';
   position:fixed; inset:0;
@@ -85,6 +80,124 @@ body::after {
   background-size: 28px 28px;
   pointer-events:none; z-index:0;
 }
+
+/* ============================================
+   LOGIN OVERLAY
+============================================ */
+
+#loginOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+#loginOverlay.hidden { display: none; }
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 40px 34px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 60px rgba(201,168,76,.08), 0 24px 60px rgba(0,0,0,.4);
+}
+
+.login-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:2px;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.login-emblem {
+  width: 68px; height: 68px;
+  border-radius: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 14px; overflow: hidden; background: #fff;
+  box-shadow: 0 4px 24px var(--gold-glow);
+}
+.login-emblem img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.login-school {
+  font-size: 10px; font-weight: 600; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--gold); margin-bottom: 2px;
+}
+
+.login-faculty { font-size: 11px; color: var(--text-dim); margin-bottom: 26px; }
+
+.login-card h1 {
+  font-size: 19px; font-weight: 700; color: var(--text);
+  letter-spacing: -.01em; margin-bottom: 6px;
+}
+
+.login-card p { font-size: 12px; color: var(--text-dim); margin-bottom: 24px; }
+
+.login-field { margin-bottom: 12px; text-align: left; }
+
+.login-field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.login-input {
+  width: 100%; padding: 11px 14px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text);
+  font-family: var(--mono); font-size: 13px; letter-spacing: .04em;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+
+.login-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.login-btn {
+  width: 100%; margin-top: 8px; padding: 12px;
+  border: none; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  color: #05080f; font-family: var(--mono); font-size: 11px;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  cursor: pointer; transition: all .2s;
+}
+
+.login-btn:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 4px 20px var(--gold-glow);
+  transform: translateY(-1px);
+}
+
+.login-error {
+  margin-top: 12px; padding: 10px 13px;
+  background: rgba(244,63,94,.07); border: 1px solid rgba(244,63,94,.2);
+  border-radius: var(--r-sm); color: var(--danger);
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  display: none;
+}
+
+/* shake animation on wrong credentials */
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-6px); }
+  80%      { transform: translateX(6px); }
+}
+.login-card.shake { animation: shake .38s ease; }
 
 /* ============================================
    NAV
@@ -130,7 +243,6 @@ nav {
   line-height:1;
 }
 
-/* Shared style for nav buttons and link buttons */
 nav button,
 .nav-link-btn {
   border: 1px solid var(--border);
@@ -165,7 +277,6 @@ nav button.active {
   font-weight: 700;
 }
 
-/* Divider between link buttons and page-toggle buttons */
 .nav-divider {
   width: 1px;
   height: 22px;
@@ -191,8 +302,6 @@ nav button.active {
   min-height: calc(100vh - 58px);
 }
 
-/* ===== SIDEBAR ===== */
-
 .sidebar {
   padding: 22px 18px;
   border-right: 1px solid var(--border);
@@ -201,8 +310,6 @@ nav button.active {
   height:calc(100vh - 58px);
   overflow-y:auto;
 }
-
-/* QR CARD */
 
 .qr-card {
   background: var(--panel);
@@ -227,7 +334,6 @@ nav button.active {
   margin-bottom:14px;
 }
 
-/* QR WRAPPER — clickable */
 #qrWrapper {
   width:192px; height:192px;
   margin:0 auto 16px;
@@ -262,8 +368,6 @@ nav button.active {
   opacity:.8;
 }
 
-/* TIMER */
-
 .timer-header { display:flex; justify-content:space-between; margin-bottom:6px; }
 
 .timer-label {
@@ -284,8 +388,6 @@ nav button.active {
   transition: width 1s linear, background .4s ease;
 }
 
-/* TOKEN */
-
 .token-box {
   background:var(--surface); border:1px solid var(--border);
   border-radius:var(--r-sm); padding:9px 11px; margin-top:12px; text-align:left;
@@ -300,8 +402,6 @@ nav button.active {
   font-family:var(--mono); font-size:9px;
   color:var(--gold); word-break:break-all; line-height:1.6;
 }
-
-/* STATS */
 
 .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 
@@ -319,8 +419,6 @@ nav button.active {
   font-size:10px; color:var(--muted); margin-top:3px;
   text-transform:uppercase; letter-spacing:.08em;
 }
-
-/* SIDEBAR BUTTONS */
 
 .sidebar-actions { display:flex; flex-direction:column; gap:7px; }
 
@@ -348,6 +446,17 @@ nav button.active {
 .btn-danger { background:transparent; border:1px solid rgba(244,63,94,.3); color:var(--danger); }
 .btn-danger:hover { background:rgba(244,63,94,.08); }
 
+/* also add a logout btn variant */
+.btn-logout {
+  background:transparent; border:1px solid var(--border); color:var(--text-dim);
+  font-family:var(--mono); font-size:10px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase;
+  padding:7px 16px; border-radius:var(--r-sm);
+  cursor:pointer; transition:all .2s;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.btn-logout:hover { border-color:var(--danger); color:var(--danger); }
+
 /* ============================================
    MAIN CONTENT
 ============================================ */
@@ -371,10 +480,6 @@ nav button.active {
   padding:3px 10px; border-radius:99px;
 }
 
-/* ============================================
-   TABLES
-============================================ */
-
 .table-wrap { overflow-x:auto; }
 
 table { width:100%; border-collapse:collapse; min-width:560px; }
@@ -393,8 +498,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
 .mono-cell { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
 
-/* BADGES */
-
 .badge {
   display:inline-flex; align-items:center; gap:4px;
   padding:3px 9px; border-radius:99px;
@@ -408,14 +511,10 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 .badge-blocked  { background:rgba(244,63,94,.08);  color:var(--danger); border:1px solid rgba(244,63,94,.2); }
 .badge-cooldown { background:rgba(245,158,11,.08); color:var(--warn); border:1px solid rgba(245,158,11,.2); }
 
-/* SCAN BAR */
-
 .scan-bar-wrap { display:flex; align-items:center; gap:8px; }
 .scan-bar-track { flex:1; height:4px; background:var(--subtle); border-radius:99px; overflow:hidden; }
 .scan-bar-fill  { height:100%; background:var(--gold); border-radius:99px; }
 .scan-label     { font-family:var(--mono); font-size:10px; color:var(--text-dim); min-width:30px; text-align:right; }
-
-/* ACTION BUTTONS */
 
 .action-row { display:flex; gap:5px; flex-wrap:wrap; }
 
@@ -494,7 +593,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
   box-sizing:border-box;
 }
 
-/* Canvas sits inside the padding — never clips the quiet zone */
 #qrLarge canvas,
 #qrLarge img {
   display:block !important;
@@ -657,8 +755,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
   font-family:var(--mono); font-size:10px; letter-spacing:.04em; display:none;
 }
 
-/* SUCCESS */
-
 .scan-success { display:none; animation:successIn .38s cubic-bezier(.34,1.56,.64,1); }
 
 @keyframes successIn {
@@ -681,13 +777,9 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 .success-id { font-family:var(--mono); font-size:28px; font-weight:700; color:var(--text); margin-bottom:6px; }
 .success-type { font-size:13px; color:var(--text-dim); }
 
-/* EXPIRED */
-
 .scan-expired { display:none; text-align:center; padding:20px 0; }
 .expired-icon { font-size:36px; margin-bottom:12px; }
 .expired-label { font-family:var(--mono); font-size:12px; color:var(--danger); letter-spacing:.06em; line-height:1.7; }
-
-/* QR FADE ANIMATIONS */
 
 .qrFadeOut { animation:fadeOut .28s ease forwards; }
 .qrFadeIn  { animation:fadeIn  .28s ease forwards; }
@@ -712,6 +804,37 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
 <!-- TOAST -->
 <div id="toast"></div>
+
+<!-- ============================================
+   LOGIN OVERLAY  (shown before admin dashboard)
+============================================ -->
+
+<div id="loginOverlay">
+  <div class="login-card" id="loginCard">
+    <div class="login-emblem">
+      <img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA">
+    </div>
+    <div class="login-school">MSA University</div>
+    <div class="login-faculty">Faculty of Management Sciences · MIS</div>
+    <h1>Admin Access</h1>
+    <p>Sign in to manage attendance records</p>
+
+    <div class="login-field">
+      <label for="loginUser">Username</label>
+      <input class="login-input" id="loginUser" type="text"
+        placeholder="Username" autocomplete="username" autocorrect="off" spellcheck="false" />
+    </div>
+
+    <div class="login-field">
+      <label for="loginPass">Password</label>
+      <input class="login-input" id="loginPass" type="password"
+        placeholder="Password" autocomplete="current-password" />
+    </div>
+
+    <button class="login-btn" onclick="attemptLogin()">Sign In</button>
+    <div class="login-error" id="loginError">Incorrect username or password</div>
+  </div>
+</div>
 
 <!-- QR LIGHTBOX -->
 <div id="qrLightbox">
@@ -748,7 +871,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
     </div>
   </div>
 
-  <!-- External quick-links -->
   <a href="https://e-learning.msa.edu.eg/" target="_blank" rel="noopener" class="nav-link-btn">
     ⇗ <span>E-Learning</span>
   </a>
@@ -756,12 +878,14 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
     ⇗ <span>Student Zone</span>
   </a>
 
-  <!-- Divider -->
   <div class="nav-divider"></div>
 
-  <!-- Page toggles -->
   <button class="active" onclick="showPage('admin')">Admin</button>
   <button onclick="showPage('scan')">Scan</button>
+
+  <!-- Logout button — only shown in admin mode -->
+  <div class="nav-divider" id="logoutDivider" style="display:none"></div>
+  <button class="btn-logout" id="logoutBtn" style="display:none" onclick="logOut()">↩ Logout</button>
 </nav>
 
 <!-- ============================================
@@ -771,7 +895,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 <div class="page active" id="page-admin">
   <div class="admin-layout">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
 
       <div class="qr-card">
@@ -809,7 +932,6 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
     </aside>
 
-    <!-- MAIN -->
     <main class="main-content">
 
       <section>
@@ -898,12 +1020,74 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
 const API  = 'https://qr-attendance-backend-production-0d3b.up.railway.app';
 const TICK = 35;
-let timeLeft   = TICK;
-let currentURL = '';
 
-/* ============================================
-   DEVICE ID
-============================================ */
+// ============================================
+// ADMIN CREDENTIALS
+// ============================================
+
+const ADMIN_USER = 'Mocha';
+const ADMIN_PASS = '0106310MM';
+const SESSION_KEY = 'msa_admin_auth';
+
+// ============================================
+// LOGIN LOGIC
+// ============================================
+
+function attemptLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  const card  = document.getElementById('loginCard');
+
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    // Store session so page refresh doesn't require re-login
+    sessionStorage.setItem(SESSION_KEY, 'ok');
+    errEl.style.display = 'none';
+    // Fade out overlay
+    const overlay = document.getElementById('loginOverlay');
+    overlay.style.transition = 'opacity .35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.classList.add('hidden');
+      overlay.style.opacity = '';
+    }, 350);
+    // Reveal logout button in nav
+    document.getElementById('logoutBtn').style.display    = 'inline-flex';
+    document.getElementById('logoutDivider').style.display = 'block';
+    // Boot admin
+    bootAdmin();
+  } else {
+    errEl.style.display = 'block';
+    card.classList.remove('shake');
+    // Force reflow to restart animation
+    void card.offsetWidth;
+    card.classList.add('shake');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function logOut() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').style.display = 'none';
+  document.getElementById('logoutBtn').style.display    = 'none';
+  document.getElementById('logoutDivider').style.display = 'none';
+  const overlay = document.getElementById('loginOverlay');
+  overlay.classList.remove('hidden');
+  overlay.style.opacity = '1';
+  toast('Logged out', 'warn');
+  // Stop polling intervals
+  if (window._adminIntervals) {
+    window._adminIntervals.forEach(id => clearInterval(id));
+    window._adminIntervals = [];
+  }
+}
+
+// ============================================
+// DEVICE ID
+// ============================================
 
 function getDeviceId() {
   let id = localStorage.getItem('qr_device_id');
@@ -914,9 +1098,9 @@ function getDeviceId() {
   return id;
 }
 
-/* ============================================
-   TOAST
-============================================ */
+// ============================================
+// TOAST
+// ============================================
 
 function toast(msg, type = 'success') {
   const wrap = document.getElementById('toast');
@@ -927,36 +1111,35 @@ function toast(msg, type = 'success') {
   setTimeout(() => el.remove(), 3000);
 }
 
-/* ============================================
-   BUILD QR — both sidebar and lightbox
-============================================ */
+// ============================================
+// BUILD QR
+// ============================================
+
+let timeLeft   = TICK;
+let currentURL = '';
 
 function buildQR(url) {
   currentURL = url;
 
-  // Sidebar QR
   const el = document.getElementById('qrcode');
   el.innerHTML = '';
   new QRCode(el, { text: url, width: 184, height: 184,
     colorDark: '#000000', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H });
 
-  // Lightbox QR (always keep in sync)
   const lb = document.getElementById('qrLarge');
   lb.innerHTML = '';
   new QRCode(lb, { text: url, width: 308, height: 308,
     colorDark: '#000000', colorLight: '#ffffff',
     correctLevel: QRCode.CorrectLevel.H });
-  // The library injects both a <canvas> AND a hidden <img> — remove img
-  // so only the canvas remains, perfectly centred inside the padding.
   setTimeout(() => {
     lb.querySelectorAll('img').forEach(img => img.remove());
   }, 50);
 }
 
-/* ============================================
-   LIGHTBOX
-============================================ */
+// ============================================
+// LIGHTBOX
+// ============================================
 
 function openLightbox() {
   document.getElementById('qrLightbox').classList.add('open');
@@ -968,12 +1151,11 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
-// Close on Escape key
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-/* ============================================
-   FETCH TOKEN
-============================================ */
+// ============================================
+// FETCH TOKEN
+// ============================================
 
 async function fetchToken() {
   try {
@@ -987,9 +1169,9 @@ async function fetchToken() {
   }
 }
 
-/* ============================================
-   FORCE RESET
-============================================ */
+// ============================================
+// FORCE RESET
+// ============================================
 
 async function forceResetToken() {
   await fetch(`${API}/api/reset-token`, { method: 'POST' });
@@ -997,9 +1179,9 @@ async function forceResetToken() {
   toast('QR token reset');
 }
 
-/* ============================================
-   TIMER — updates both sidebar and lightbox bars
-============================================ */
+// ============================================
+// TIMER
+// ============================================
 
 function updateTimer() {
   timeLeft = Math.max(0, timeLeft - 1);
@@ -1028,17 +1210,17 @@ function updateTimer() {
   }
 }
 
-/* ============================================
-   HELPERS — is_blocked can be bool or string
-============================================ */
+// ============================================
+// HELPERS
+// ============================================
 
 function isBlocked(val) {
   return val === true || val === 'true';
 }
 
-/* ============================================
-   RENDER LOG
-============================================ */
+// ============================================
+// RENDER LOG
+// ============================================
 
 async function renderLog() {
   try {
@@ -1079,9 +1261,9 @@ async function renderLog() {
   }
 }
 
-/* ============================================
-   RENDER DEVICES
-============================================ */
+// ============================================
+// RENDER DEVICES
+// ============================================
 
 async function renderDevices() {
   try {
@@ -1149,9 +1331,9 @@ async function renderDevices() {
   }
 }
 
-/* ============================================
-   DEVICE ACTIONS
-============================================ */
+// ============================================
+// DEVICE ACTIONS
+// ============================================
 
 async function blockDevice(deviceId) {
   const r = await fetch(`${API}/api/block-device`, {
@@ -1195,9 +1377,9 @@ async function bonusScan(deviceId) {
   else toast('Update failed', 'error');
 }
 
-/* ============================================
-   EXPORT CSV
-============================================ */
+// ============================================
+// EXPORT CSV
+// ============================================
 
 async function exportCSV() {
   const res = await fetch(`${API}/api/log`);
@@ -1219,9 +1401,9 @@ function clearLog() {
   alert('Clear records directly in your Supabase dashboard under the attendance table.');
 }
 
-/* ============================================
-   SCAN PAGE
-============================================ */
+// ============================================
+// SCAN PAGE
+// ============================================
 
 async function initScanPage(token) {
   const deviceId = getDeviceId();
@@ -1281,9 +1463,9 @@ function showScanError(reason) {
   el.style.display = 'block';
 }
 
-/* ============================================
-   NAVIGATION
-============================================ */
+// ============================================
+// NAVIGATION
+// ============================================
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1294,9 +1476,26 @@ function showPage(id) {
   });
 }
 
-/* ============================================
-   BOOT
-============================================ */
+// ============================================
+// BOOT ADMIN — starts polling after login
+// ============================================
+
+async function bootAdmin() {
+  await fetchToken();
+  renderLog();
+  renderDevices();
+  window._adminIntervals = window._adminIntervals || [];
+  window._adminIntervals.push(
+    setInterval(fetchToken,     5000),
+    setInterval(updateTimer,    1000),
+    setInterval(renderLog,     10000),
+    setInterval(renderDevices, 10000)
+  );
+}
+
+// ============================================
+// BOOT
+// ============================================
 
 window.onload = async () => {
   const params  = new URLSearchParams(location.search);
@@ -1306,19 +1505,44 @@ window.onload = async () => {
   if (!isAdmin && !isScan) {
     document.getElementById('mainNav').style.display = 'none';
     document.getElementById('page-admin').classList.remove('active');
+    // Hide login overlay too — no valid mode
+    document.getElementById('loginOverlay').classList.add('hidden');
+    return;
   }
 
   if (isAdmin) {
-    await fetchToken();
-    renderLog();
-    renderDevices();
-    setInterval(fetchToken,    5000);
-    setInterval(updateTimer,   1000);
-    setInterval(renderLog,    10000);
-    setInterval(renderDevices,10000);
+    // Already authenticated this session?
+    if (sessionStorage.getItem(SESSION_KEY) === 'ok') {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.getElementById('logoutBtn').style.display    = 'inline-flex';
+      document.getElementById('logoutDivider').style.display = 'block';
+      bootAdmin();
+    } else {
+      // Show login overlay, hide nav until logged in
+      document.getElementById('mainNav').style.display = 'none';
+      // Re-show nav once login succeeds (handled in attemptLogin)
+      // Override attemptLogin to also show nav
+      const _orig = window.attemptLogin;
+      window.attemptLogin = function() {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        if (user === ADMIN_USER && pass === ADMIN_PASS) {
+          document.getElementById('mainNav').style.display = '';
+        }
+        _orig();
+      };
+      // Enter key support
+      ['loginUser','loginPass'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', e => {
+          if (e.key === 'Enter') window.attemptLogin();
+        });
+      });
+    }
+    return;
   }
 
   if (isScan) {
+    document.getElementById('loginOverlay').classList.add('hidden');
     document.getElementById('mainNav').style.display = 'none';
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById('page-scan').classList.add('active');
