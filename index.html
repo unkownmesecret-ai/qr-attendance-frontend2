@@ -92,7 +92,7 @@ body::after {
 
 nav {
   position:sticky; top:0; z-index:200;
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:8px;
   padding:0 28px;
   height:58px;
   background: rgba(5,8,15,.92);
@@ -130,7 +130,9 @@ nav {
   line-height:1;
 }
 
-nav button {
+/* Shared style for nav buttons and link buttons */
+nav button,
+.nav-link-btn {
   border: 1px solid var(--border);
   padding: 7px 16px;
   border-radius: var(--r-sm);
@@ -142,16 +144,34 @@ nav button {
   letter-spacing: .1em;
   text-transform: uppercase;
   transition: all .2s;
-  font-weight:500;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
 }
 
-nav button:hover { border-color:var(--gold); color:var(--gold); }
+nav button:hover,
+.nav-link-btn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
 
 nav button.active {
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
   border-color: var(--gold);
   color: #05080f;
   font-weight: 700;
+}
+
+/* Divider between link buttons and page-toggle buttons */
+.nav-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
 }
 
 /* ============================================
@@ -669,6 +689,8 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 @media (max-width:860px) {
   .admin-layout { grid-template-columns:1fr; }
   .sidebar { position:static; height:auto; border-right:none; border-bottom:1px solid var(--border); }
+  .nav-divider { display:none; }
+  .nav-link-btn span { display:none; }
 }
 
 </style>
@@ -704,12 +726,27 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
 <nav id="mainNav">
   <div class="nav-brand">
-    <div class="nav-emblem"><img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA"></div>
+    <div class="nav-emblem">
+      <img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA">
+    </div>
     <div class="nav-titles">
       <div class="nav-title">MSA University</div>
       <div class="nav-sub">MIS · Attendance System</div>
     </div>
   </div>
+
+  <!-- External quick-links -->
+  <a href="https://e-learning.msa.edu.eg/" target="_blank" rel="noopener" class="nav-link-btn">
+    ⇗ <span>E-Learning</span>
+  </a>
+  <a href="http://students-zone.msa.edu.eg/Login.aspx" target="_blank" rel="noopener" class="nav-link-btn">
+    ⇗ <span>Student Zone</span>
+  </a>
+
+  <!-- Divider -->
+  <div class="nav-divider"></div>
+
+  <!-- Page toggles -->
   <button class="active" onclick="showPage('admin')">Admin</button>
   <button onclick="showPage('scan')">Scan</button>
 </nav>
@@ -810,7 +847,9 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
       <div id="formState">
         <div class="scan-logo-wrap">
-          <div class="scan-emblem"><img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA"></div>
+          <div class="scan-emblem">
+            <img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA">
+          </div>
           <div class="scan-school">MSA University</div>
           <div class="scan-faculty">Faculty of Management Sciences · MIS</div>
         </div>
@@ -1023,7 +1062,7 @@ async function renderLog() {
 }
 
 /* ============================================
-   RENDER DEVICES — all visual bugs fixed
+   RENDER DEVICES
 ============================================ */
 
 async function renderDevices() {
@@ -1044,7 +1083,6 @@ async function renderDevices() {
     container.innerHTML = devices.map(d => {
       const pct = d.max_scans > 0 ? Math.round((d.scan_count / d.max_scans) * 100) : 0;
 
-      // FIX: coerce is_blocked from string OR boolean
       const blocked  = isBlocked(d.is_blocked);
       const inCool   = !blocked && d.cooldown_until && Date.now() < new Date(d.cooldown_until).getTime();
 
@@ -1053,7 +1091,6 @@ async function renderDevices() {
       else if (inCool) statusBadge = `<span class="badge badge-cooldown">Cooldown</span>`;
       else             statusBadge = `<span class="badge badge-active">Active</span>`;
 
-      // FIX: show cooldown time properly; null → '—'
       let cooldownStr = '—';
       if (d.cooldown_until) {
         const cd = new Date(d.cooldown_until);
