@@ -480,6 +480,43 @@ nav button.active {
   padding:3px 10px; border-radius:99px;
 }
 
+/* LOG SEARCH */
+
+.log-search-wrap {
+  position: relative;
+  margin-bottom: 14px;
+}
+
+.log-search {
+  width: 100%; padding: 10px 14px 10px 36px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: var(--surface); color: var(--text);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .03em;
+  outline: none; transition: border-color .2s, box-shadow .2s;
+}
+
+.log-search:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+.log-search::placeholder { color: var(--muted); }
+
+.log-search-icon {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px; color: var(--muted);
+  pointer-events: none;
+}
+
+/* DELETE ROW BUTTON */
+
+.act-delete {
+  background: rgba(244,63,94,.1);
+  color: var(--danger);
+  border: 1px solid rgba(244,63,94,.22);
+}
+
 .table-wrap { overflow-x:auto; }
 
 table { width:100%; border-collapse:collapse; min-width:560px; }
@@ -946,9 +983,8 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn btn-gold"   onclick="exportCSV()">↓ Export CSV</button>
-        <button class="btn btn-ghost"  onclick="forceResetToken()">↺ Force Reset QR</button>
-        <button class="btn btn-danger" onclick="clearLog()">✕ Clear Log</button>
+        <button class="btn btn-gold"  onclick="exportCSV()">↓ Export CSV</button>
+        <button class="btn btn-ghost" onclick="forceResetToken()">↺ Force Reset QR</button>
       </div>
 
     </aside>
@@ -959,6 +995,12 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
         <div class="section-header">
           <span class="section-title">Attendance Log</span>
           <span class="section-count" id="logCount">0 records</span>
+        </div>
+        <div class="log-search-wrap">
+          <input class="log-search" id="logSearch" type="text"
+            placeholder="Search by User ID, Device, or Date…"
+            oninput="filterLog()" autocomplete="off" spellcheck="false" />
+          <span class="log-search-icon">⌕</span>
         </div>
         <div class="table-wrap">
           <div id="logContainer"><div class="empty-state">Loading records...</div></div>
@@ -1247,42 +1289,90 @@ function isBlocked(val) {
 // RENDER LOG
 // ============================================
 
+let _logData = [];
+
+function buildLogTable(log) {
+  const container = document.getElementById('logContainer');
+  if (!log.length) {
+    container.innerHTML = '<div class="empty-state">No matching records</div>';
+    return;
+  }
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr><th>#</th><th>User ID</th><th>Device</th><th>Date & Time</th><th>Type</th><th>Delete</th></tr>
+      </thead>
+      <tbody>
+        ${log.map((e, i) => `
+          <tr id="row-${e.id}">
+            <td class="mono-cell">${i + 1}</td>
+            <td>${e.userid}</td>
+            <td class="mono-cell">${e.deviceid}</td>
+            <td class="mono-cell">${e.fulltime}</td>
+            <td><span class="badge badge-${e.type}">${e.type === 'new' ? '● New' : '↩ Return'}</span></td>
+            <td><button class="act-btn act-delete" onclick="deleteRecord(${e.id}, '${e.userid}')">✕ Delete</button></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>`;
+}
+
 async function renderLog() {
   try {
     const res = await fetch(`${API}/api/log`);
-    const log = await res.json();
+    _logData  = await res.json();
 
-    document.getElementById('statTotal').textContent = log.length;
+    document.getElementById('statTotal').textContent = _logData.length;
     const today = new Date().toLocaleDateString('en-US');
-    document.getElementById('statToday').textContent = log.filter(e => e.date === today).length;
-    document.getElementById('logCount').textContent  = log.length + ' records';
+    document.getElementById('statToday').textContent = _logData.filter(e => e.date === today).length;
+    document.getElementById('logCount').textContent  = _logData.length + ' records';
 
-    const container = document.getElementById('logContainer');
-
-    if (!log.length) {
-      container.innerHTML = '<div class="empty-state">No records yet</div>';
-      return;
-    }
-
-    container.innerHTML = `
-      <table>
-        <thead>
-          <tr><th>#</th><th>User ID</th><th>Device</th><th>Date & Time</th><th>Type</th></tr>
-        </thead>
-        <tbody>
-          ${log.map((e, i) => `
-            <tr>
-              <td class="mono-cell">${i + 1}</td>
-              <td>${e.userid}</td>
-              <td class="mono-cell">${e.deviceid}</td>
-              <td class="mono-cell">${e.fulltime}</td>
-              <td><span class="badge badge-${e.type}">${e.type === 'new' ? '● New' : '↩ Return'}</span></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>`;
+    // Re-apply any active search filter after refresh
+    filterLog();
   } catch (err) {
     console.error('[renderLog]', err);
+  }
+}
+
+function filterLog() {
+  const q = (document.getElementById('logSearch').value || '').toLowerCase().trim();
+  const filtered = q
+    ? _logData.filter(e =>
+        (e.userid   || '').toLowerCase().includes(q) ||
+        (e.deviceid || '').toLowerCase().includes(q) ||
+        (e.date     || '').toLowerCase().includes(q) ||
+        (e.fulltime || '').toLowerCase().includes(q)
+      )
+    : _logData;
+
+  document.getElementById('logCount').textContent =
+    q ? `${filtered.length} of ${_logData.length} records` : `${_logData.length} records`;
+
+  buildLogTable(filtered);
+}
+
+async function deleteRecord(id, userid) {
+  if (!confirm(`Delete attendance record for "${userid}"?`)) return;
+  try {
+    const r = await fetch(`${API}/api/delete-record`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      toast('Record deleted', 'warn');
+      // Remove from local cache instantly, no need to refetch
+      _logData = _logData.filter(e => e.id !== id);
+      document.getElementById('statTotal').textContent = _logData.length;
+      const today = new Date().toLocaleDateString('en-US');
+      document.getElementById('statToday').textContent = _logData.filter(e => e.date === today).length;
+      filterLog();
+    } else {
+      toast('Delete failed: ' + (d.reason || 'unknown'), 'error');
+    }
+  } catch (err) {
+    toast('Delete failed', 'error');
   }
 }
 
@@ -1420,10 +1510,6 @@ async function exportCSV() {
   a.download = `attendance_${new Date().toLocaleDateString('en-US').replace(/\//g,'-')}.csv`;
   a.click();
   toast('CSV exported');
-}
-
-function clearLog() {
-  alert('Clear records directly in your Supabase dashboard under the attendance table.');
 }
 
 // ============================================
