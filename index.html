@@ -106,15 +106,13 @@ nav {
 }
 
 .nav-emblem {
-  width:34px; height:34px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
+  width:38px; height:38px;
   border-radius:8px;
   display:flex; align-items:center; justify-content:center;
-  font-size:15px; font-weight:800; color:#05080f;
-  font-family: var(--sans);
-  flex-shrink:0;
+  flex-shrink:0; overflow:hidden; background:#fff;
   box-shadow: 0 2px 12px var(--gold-glow);
 }
+.nav-emblem img { width:100%; height:100%; object-fit:contain; display:block; }
 
 .nav-titles { display:flex; flex-direction:column; gap:1px; }
 
@@ -573,14 +571,13 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 .scan-logo-wrap { margin-bottom:22px; }
 
 .scan-emblem {
-  width:54px; height:54px;
-  background:linear-gradient(135deg, var(--gold) 0%, var(--gold-dim) 100%);
-  border-radius:14px;
+  width:72px; height:72px;
+  border-radius:16px;
   display:inline-flex; align-items:center; justify-content:center;
-  font-size:22px; font-weight:800; color:#05080f;
-  margin-bottom:10px;
-  box-shadow:0 4px 20px var(--gold-glow);
+  margin-bottom:10px; overflow:hidden; background:#fff;
+  box-shadow:0 4px 24px var(--gold-glow);
 }
+.scan-emblem img { width:100%; height:100%; object-fit:contain; display:block; }
 
 .scan-school {
   font-size:10px; font-weight:600; letter-spacing:.14em;
@@ -707,7 +704,7 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
 <nav id="mainNav">
   <div class="nav-brand">
-    <div class="nav-emblem">M</div>
+    <div class="nav-emblem"><img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA"></div>
     <div class="nav-titles">
       <div class="nav-title">MSA University</div>
       <div class="nav-sub">MIS · Attendance System</div>
@@ -813,14 +810,14 @@ tbody tr:hover { background:rgba(201,168,76,.03); }
 
       <div id="formState">
         <div class="scan-logo-wrap">
-          <div class="scan-emblem">M</div>
+          <div class="scan-emblem"><img src="https://e-learning.msa.edu.eg/pluginfile.php/1/core_admin/logocompact/300x300/1778578051/MSA-New-Logo-Small-V%20%281%29.png" alt="MSA"></div>
           <div class="scan-school">MSA University</div>
           <div class="scan-faculty">Faculty of Management Sciences · MIS</div>
         </div>
         <h1>Student Check-In</h1>
         <p>Enter your Student ID to record attendance</p>
         <input class="scan-input" id="idInput" type="text"
-          placeholder="e.g. 20231234"
+          placeholder="Your e-learning ID (e.g. 266618)"
           autocomplete="off" autocorrect="off" spellcheck="false"/>
         <button class="scan-submit" onclick="submitID()">Confirm Attendance</button>
         <div class="scan-error" id="errorMsg"></div>
